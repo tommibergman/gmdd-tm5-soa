@@ -1,16 +1,22 @@
 #from lonlat import lonlat
 import netCDF4 as nc 
 import xarray as xr
-def get_gridboxarea(grid='TM53x2'):
+import os
+def get_gridboxarea(grid, path=''):
 	if grid=='TM53x2':
-		gbfile='/Users/bergmant/Documents/python/tm5/griddef_62.nc'
-		ncgb=nc.Dataset(gbfile,'r')
-		gb=ncgb.variables['area']
-		return gb
+		gridareafile=path+'griddef_62.nc'
+		if os.path.isfile(gridareafile):
+			ncgb=nc.Dataset(gridareafile,'r')
+			gridarea=ncgb.variables['area']
+			return gridarea
+		else:
+			print 'gridarea file: '+gridareafile+' not found!'
+			return False
 	else:
+		print 'grid name unkown'
 		return False
 def get_gb_xr():
-	gbfile='/Users/bergmant/Documents/python/tm5/griddef_62.nc'
+	gbfile='griddef_62.nc'
 	dsgb=xr.open_dataset(gbfile)
 #	gb=ncgb.variables['area']
 	return dsgb
@@ -92,3 +98,146 @@ def lonlat(grid):
         return None
     
     return lon,lat
+
+def write_netcdf_file(datain, varnames, filename, lat=None, lon=None, timein=None,
+                      var_longnames='NetCDF variable',
+                      var_units='',
+                      time_name='time',
+                      time_units='days since 2010-01-01 00:00:00',
+                      time_longname='time',
+                      time_standardname='time',
+                      time_calender='gregorian',
+                      lon_name='lon',
+                      lon_longname='longitude',
+                      lon_standardname='longitude',
+                      lon_units='degrees_east',
+                      lon_axis='X',
+                      lat_name='lat',
+                      lat_longname='latitude',
+                      lat_standardname='latitude',
+                      lat_units='degrees_north',
+                      lat_axis='Y',
+                      netcdf_format='NETCDF4',
+                      data_description='Data saved from Python'):
+    """
+    Write a 1D. 2D or 3D data into a netCDF file
+
+    Data should be formatted so that it is either ntime for 1D data, nlat x xlon
+    for 2D data, or ntime x nlat x nlon for 3D data. Other formats will not be
+    saved correctly or at all.
+
+    """
+    
+    # Remove old file
+    if os.path.isfile(filename):
+        os.remove(filename)    
+    
+    root_grp = Dataset(filename, 'w', format=netcdf_format)
+    
+
+    # Find the length of the time axis if any
+    if timein is None:
+        timedim = None
+    else:
+        timedim = len(timein)
+        root_grp.createDimension(time_name, timedim)
+        times = root_grp.createVariable(time_name, 'f8', (time_name,))
+
+    nvars = len(datain)
+
+    root_grp.description = data_description
+
+    # dimensions
+    
+    
+    if lat is not None:    
+        root_grp.createDimension(lat_name, len(lat))
+        latitudes = root_grp.createVariable(lat_name, 'f4', (lat_name,))
+    
+    if lon is not None:
+        root_grp.createDimension(lon_name, len(lon))
+        longitudes = root_grp.createVariable(lon_name, 'f4', (lon_name,))
+   
+    # variables
+    vars = [] #Initialize empty list to hold netCDF variables
+    
+    print (nvars,np.shape(nvars))
+    for i in range(nvars):
+        print (i,varnames[i])
+        if lat is None:
+            vars.append(root_grp.createVariable(varnames[i], 'f4',time_name))
+        else:
+            vars.append(root_grp.createVariable(varnames[i], 'f4',
+                                       (time_name, lat_name, lon_name,)))
+        
+    # Assign values to netCDF variables
+    if lat is not None: latitudes[:] = lat
+    if lon is not None: longitudes[:] = lon
+    print (type(timein[0]),timein)
+    if (isinstance(timein[0], datetime.datetime)):
+      test=nc.date2num(timein,'days since 2010-01-01 00:00:00',calendar='standard')
+      print (test)
+      newtime=[]
+      for i in test:
+        newtime.append(i)
+      if timein is not None: times[:] = newtime #timein
+    else:
+      if timein is not None: times[:] = timein
+      
+        
+    
+    for i in range(nvars):
+        print (datain[i])
+        if np.ndim(datain[i])==1:                        
+            time_in_len=len(datain[i])            
+            vars[i][:]=np.NaN
+            vars[i][0:time_in_len] = datain[i]
+            print (datain[i])
+        elif np.ndim(datain[i])==3:
+            time_in_len=datain[i].shape[0]
+            vars[i][:,:,:]=np.NaN
+            vars[i][0:time_in_len,:,:] = datain[i]
+        elif np.ndim(datain[i])==4:
+            time_in_len=datain[i].shape[0]
+            vars[i][:,:,:,:]=np.NaN
+            vars[i][0:time_in_len,1,:,:] = datain[i]
+        else:
+            print('Unsupported dimension for the variable. Exiting.')
+            sys.exit()
+
+    # Define attributes
+    if timein is not None:
+        times.units = time_units
+        times.long_name = time_longname
+        times.standard_name = time_standardname
+        times.calender = time_calender
+
+    if lon is not None:    
+        longitudes.long_name = lon_longname
+        longitudes.standard_name = lon_standardname
+        longitudes.units = lon_units
+
+    if lat is not None:    
+        latitudes.long_name = lat_longname
+        latitudes.standard_name = lat_standardname
+        latitudes.units = lat_units
+
+
+    for i in range(nvars):
+        if type(var_longnames) is list:
+          vars[i].long_name = var_longnames[i]
+        else:
+          vars[i].long_name = var_longnames
+
+        if type(var_units) is list:                  
+            vars[i].units = var_units[i]
+        else:
+            vars[i].units = var_units
+
+    
+
+    root_grp.history = 'Created ' + time.ctime(time.time())
+    root_grp.source = ''
+    root_grp.contact='tommi.bergman@fmi.fi'
+
+    root_grp.close()
