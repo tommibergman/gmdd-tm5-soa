@@ -5,12 +5,12 @@ from mpl_toolkits.basemap import Basemap
 import matplotlib as mpl
 import sys
 sys.path.append("/Users/bergmant/Documents//ifs+tm5-validation/scripts")
-from colocate_aeronet import do_colocate
-from lonlat import lonlat
+#from colocate_aeronet import do_colocate
+#from lonlat import lonlat
 from pylab import *
 from settings import *
 #from production import production
-from tm5_tools import get_gb
+from general_toolbox import get_gridboxarea,lonlat
 import matplotlib.gridspec as gridspec
 import string
 def read_data(filein,species):
@@ -28,6 +28,9 @@ def read_data(filein,species):
 	return data
 
 def read_data_type(filein,species,budtype):
+	"""
+	read data from filein for give data type
+	"""
 	ff=nc.Dataset(filein)
 	#for i in ff.variables:
 	#	if species in ff.variables[i]:
@@ -45,20 +48,32 @@ def read_data_type(filein,species,budtype):
 	return data
 
 def read_emi(filein,species=['bc','oa','soa','so4','ss','dust','so2','isop','terp']):
+	"""
+	read emission data for species
+	"""
 	emidata=read_data_type(filein,species,'emi') 
 	print emidata.keys()
 	return emidata
 def read_dry(filein,species=['bc','oa','soa','so4','ss','dust']):
+	"""
+	read drydep data for species
+	"""
 	drydata=read_data_type(filein,species,'dry') 
 	print drydata.keys()
 	return drydata
 	pass
 def read_wet(filein,species=['bc','oa','soa','so4','ss','dust']):
+	"""
+	read wetdep data for species
+	"""
 	wetdata=read_data_type(filein,species,'wet') 
 	print wetdata.keys()
 	return wetdata
 	pass
 def read_load(filein,species=['bc','oa','soa','so4','ss','dust']):
+	"""
+	read burden data for species
+	"""
 	print filein
 	loaddata=read_data_type(filein,species,'load') 
 	print loaddata.keys()
@@ -71,6 +86,9 @@ def read_old_SOA():
 	return olddata*2.4/1.15,gb1d
 
 def prod_data(filein,species):
+	"""
+	Read data for chemical production
+	"""
 	ff=nc.Dataset(filein)
 	data=[]
 	if (species=='soa' and 'prod_elvoc'in ff.variables):
@@ -87,6 +105,9 @@ def prod_data(filein,species):
 	
 	return data
 def prod_data_source(filein,species):
+	"""
+	Read data for chemical production by pathway
+	"""
 	ff=nc.Dataset(filein)
 	data={}
 	if (species=='soa' and 'p_el_ohterp'in ff.variables):
@@ -115,10 +136,17 @@ def prod_data_source(filein,species):
 		data['sv_o3isop']=np.array(ff.variables['p_sv_o3isop'][:])
 	return data
 def read_voc(filein):
+	"""
+	Read VOC emissions
+	"""
 	isop=nc.Dataset(filein,'r').variables['emiisop'][:]
 	terp=nc.Dataset(filein,'r').variables['emiterp'][:]
 	return terp,isop
 def mass_budget(filein):
+	"""
+	calculate the budgets
+	"""
+
 	data=np.zeros((6,6,12,90,120))
 	pd=np.zeros((2,2,12,34,90,120))
 	names=['bc','oa','soa','so4','ss','dust']
@@ -148,7 +176,7 @@ def mass_budget(filein):
 	print np.shape(data)
 	days=np.array([31,28,31,30,31,30,31,31,30,31,30,31])
 
-	gb=get_gb()
+	gb=get_gridboxarea('TM53x2')
 	for i in pdsource:
 		temp=0
 		for m in range(12):
@@ -203,6 +231,9 @@ def mass_budget(filein):
 #		print 'prod ',proddata[i,1]*1e-9
 	return dataglobal,proddata,data,pd
 def mapit_log(data,clevs,ax):
+	"""
+	Map data with logarithmic scale
+	"""
 	#plt.figure()
 	lon,lat=lonlat('TM53x2')
 	m = Basemap(projection='robin',lat_0=0,lon_0=0,ax=ax)
@@ -217,6 +248,9 @@ def mapit_log(data,clevs,ax):
 	#m.scatter(x1,y1,c='r',marker='o',s=100)
 	m.colorbar(cs,location='bottom')
 def mapit_boundary(data,clevs,ax,diverging=False,**kwargs):
+	"""
+	Map data with boundary value scale
+	"""
 	#plt.figure()
 	if diverging:
 		mycmap=plt.get_cmap('RdBu_r',len(clevs)-1) 
@@ -242,6 +276,9 @@ def mapit_boundary(data,clevs,ax,diverging=False,**kwargs):
 	cb.ax.set_xticklabels(clevs)
 	cb.set_label(cblabel)
 def budgetonly(filename):
+	"""
+	calculate budget only
+	"""
 	print  'processing ' + filename
 	print '\n'
 	data1,prod1,alldata,allprod=mass_budget(filename)
@@ -275,7 +312,7 @@ def dostuff(filename):
 	wetso2=gg.variables['wetso2']
 	dryso2=gg.variables['dryso2']
 	
-	gb=get_gb()
+	gb=get_gridboxarea('TM53x2')
 	load_soamm=np.zeros((12))
 	wet_soamm=np.zeros((12))
 	for i in range(12):
@@ -356,6 +393,9 @@ def dostuff(filename):
 	#mapit_log(elvotemp/elvo2[0,0,:,:],[0.1,0.2,0.4,0.6,0.8,1])
 	plt.show()
 def seasonal_maps(data,bounds,diverging=False,cblabel=''):
+	"""
+	Plot data seasonlly, input data needs to have dimension (12,:,:)
+	"""
 	f,a=plt.subplots(ncols=2,nrows=2,figsize=(12,8))
 	lon,lat=lonlat('TM53x2')
 	lons, lats = np.meshgrid(lon,lat)
@@ -391,6 +431,10 @@ def seasonal_maps(data,bounds,diverging=False,cblabel=''):
 	#f2.savefig(output_png_path+'/ORGANICMASS/map_frac_load_NEWSOA-NOSOA.png',dpi=600)
 
 def convert_1x1_2_3x2(indata):
+	""" 
+	sum 1x1 degree data into 3x2 degree grid 
+	"""
+
 	outti=np.zeros((12,90,120))
 	for kk in range(90):
 		for jj in range(120):
@@ -398,6 +442,7 @@ def convert_1x1_2_3x2(indata):
 			outti[:,kk,jj] = indata[:,kk*2:kk*2+1,jj*3:jj*3+2].sum() 
 	return outti
 if __name__=='__main__':
+
 	#output_png_path='/Users/bergmant/Documents/tm5-soa/figures/png'
 	#pdfpath='/Users/bergmant/Documents/tm5-soa/figures/pdf'
 	#jpgpath='/Users/bergmant/Documents/tm5-soa/figures/jpg'
@@ -428,8 +473,6 @@ if __name__=='__main__':
 			print np.shape(data['newsoa-ri'][0])
 			data[exp][3][0,0,:,0,:,:]=oldsoadata
 			data[exp][0][2,0]=oldsoadata.sum()#*grid
-
-	#fasdfas
 	#data[EXPS[0]]=budgetonly('/Users/bergmant/Documents/Project/tm5-SOA/output/general_TM5_soa-riccobono_2010.mm.nc')
 	#data[exp]=budgetonly('/Users/bergmant/Documents/Project/tm5-SOA/output/general_TM5_oldsoa-final_2010.mm.nc')
 	#data['nosoa']=budgetonly('/Users/bergmant/Documents/Project/tm5-SOA/output/general_TM5_nosoa_2010.mm.nc')
@@ -439,50 +482,53 @@ if __name__=='__main__':
 	print data[EXPS[0]][3].shape
 	print data[EXPS[0]][4].shape
 	print data[EXPS[0]][5].shape
-	
-	f,a=plt.subplots(ncols=4,nrows=3)
-	#f2,a2=plt.subplots(1)
-	k=-1
-	gb=get_gb()
-	print 'emiterp',np.sum(np.sum(data[EXPS[0]][4],axis=0)*gb)*1e-9*3600*365*24/12#,(prod1[1,0]*1e-9)/(np.sum(emiterp*gb)*1e-9*3600*365*24/12)
-	print 'emiisop',np.sum(np.sum(data[EXPS[0]][5],axis=0)*gb)*1e-9*3600*365*24/12#,(prod1[1,0]*1e-9)/(np.sum(emiisop*gb)*1e-9*3600*365*24/12)
 	lon,lat=lonlat('TM53x2')
-	clevs=[0,50,100,300,500,700,1000,5000]
-	for i in range(4):
-		for j in range(3):
-			k+=1
-			print ( np.squeeze(np.sum(data[EXPS[0]][3][1,:,k,0,:,:],axis=0)*gb)).max(),a.shape,j,i
-			#mapit_boundary(np.squeeze(np.sum(data['soa-riccobono'][3][1,:,k,0,:,:],axis=0)*gb)*1e3,clevs,a[j,i])
-			#a[i,j].plot(data['soa-riccobono'][5].sum(1).sum(1))
-			#a[i,j].plot(data[exp][5].sum(1).sum(1))
-			#a[i,j].plot(data['nosoa'][5].sum(1).sum(1))
-			print np.squeeze(np.mean(np.sum(data[EXPS[0]][3][1,:,k,0,:,:],axis=0)*gb*1e3,axis=1)).shape
-			a[j,i].plot(np.squeeze(np.mean(np.sum(data[exp][3][1,:,k,0,:,:],axis=0)*gb*1e3,axis=1)))
-			a[j,i].plot(np.squeeze(np.mean(np.sum(data[exp][3][1,:,k,0,:,:],axis=0)*gb*1e3,axis=1)))
-			a[j,i].plot(np.squeeze(np.mean(np.sum(data[exp][3][1,:,k,0,:,:],axis=0)*gb*1e3,axis=1)))
+	gb=get_gridboxarea('TM53x2')
+		
+	# f,a=plt.subplots(ncols=4,nrows=3)
+	# #f2,a2=plt.subplots(1)
+	# k=-1
+	# gb=get_gridboxarea('TM53x2')
+	# print 'emiterp',np.sum(np.sum(data[EXPS[0]][4],axis=0)*gb)*1e-9*3600*365*24/12#,(prod1[1,0]*1e-9)/(np.sum(emiterp*gb)*1e-9*3600*365*24/12)
+	# print 'emiisop',np.sum(np.sum(data[EXPS[0]][5],axis=0)*gb)*1e-9*3600*365*24/12#,(prod1[1,0]*1e-9)/(np.sum(emiisop*gb)*1e-9*3600*365*24/12)
+	# lon,lat=lonlat('TM53x2')
+	# clevs=[0,50,100,300,500,700,1000,5000]
+	# for i in range(4):
+	# 	for j in range(3):
+	# 		k+=1
+	# 		print ( np.squeeze(np.sum(data[EXPS[0]][3][1,:,k,0,:,:],axis=0)*gb)).max(),a.shape,j,i
+	# 		#mapit_boundary(np.squeeze(np.sum(data['soa-riccobono'][3][1,:,k,0,:,:],axis=0)*gb)*1e3,clevs,a[j,i])
+	# 		#a[i,j].plot(data['soa-riccobono'][5].sum(1).sum(1))
+	# 		#a[i,j].plot(data[exp][5].sum(1).sum(1))
+	# 		#a[i,j].plot(data['nosoa'][5].sum(1).sum(1))
+	# 		print np.squeeze(np.mean(np.sum(data[EXPS[0]][3][1,:,k,0,:,:],axis=0)*gb*1e3,axis=1)).shape
+	# 		a[j,i].plot(np.squeeze(np.mean(np.sum(data[exp][3][1,:,k,0,:,:],axis=0)*gb*1e3,axis=1)))
+	# 		a[j,i].plot(np.squeeze(np.mean(np.sum(data[exp][3][1,:,k,0,:,:],axis=0)*gb*1e3,axis=1)))
+	# 		a[j,i].plot(np.squeeze(np.mean(np.sum(data[exp][3][1,:,k,0,:,:],axis=0)*gb*1e3,axis=1)))
 
-	print data[EXPS[0]][3].shape,data[EXPS[0]][3].max()*1e9*3600
-	f,ax=plt.subplots(1)
-	mapit_boundary(np.squeeze(np.sum(data[EXPS[0]][3][1,:,:,0,:,:],axis=0).mean(0))*1e6*3600*24*365,[0.01,0.1,0.5,1.0,2.5,5,7.5,10,25,50,75,150,250,500],ax)
-	f,a,cb=seasonal_maps(np.squeeze(np.sum(data[EXPS[0]][3][1,:,:,0,:,:],axis=0))*1e9*3600,[0.01,0.1,0.5,1.0,2.5,5,7.5,10,25,50,75,150,250,500],diverging=False,cblabel='Production of SOA [ug m-2 hr-1]')
-	f.savefig(output_png_path+'/production/NEWSOA_production_SOA.png',dpi=400)
-	f,a,cb=seasonal_maps(np.squeeze(np.sum(data[EXPS[0]][3][1,:,:,:,:,:],axis=(0,2)))*1e9*3600,[0.01,0.1,0.5,1.0,2.5,5,7.5,10,25,50,75,150,500],diverging=False,cblabel='Production of SOA [ug m-2 hr-1]')
+	# print data[EXPS[0]][3].shape,data[EXPS[0]][3].max()*1e9*3600
+	# #f,ax=plt.subplots(1)
+	#mapit_boundary(np.squeeze(np.sum(data[EXPS[0]][3][1,:,:,0,:,:],axis=0).mean(0))*1e6*3600*24*365,[0.01,0.1,0.5,1.0,2.5,5,7.5,10,25,50,75,150,250,500],ax)
+	
+	#f,a,cb=seasonal_maps(np.squeeze(np.sum(data[EXPS[0]][3][1,:,:,0,:,:],axis=0))*1e9*3600,[0.01,0.1,0.5,1.0,2.5,5,7.5,10,25,50,75,150,250,500],diverging=False,cblabel='Production of SOA [ug m-2 hr-1]')
 	#f.savefig(output_png_path+'/production/NEWSOA_production_SOA.png',dpi=400)
-	f,a,cb=seasonal_maps((np.squeeze(np.sum(data[EXPS[0]][3][1,:,:,1:,:,:],axis=(0,2)))-np.squeeze(np.sum(data[EXPS[0]][3][1,:,:,0,:,:],axis=0)))*1e9*3600,[-50,-25,-10,-7.5,-5,-2.5,-1.0,-0.5,-0.1,-0.01,0.01,0.1,0.5,1.0,2.5,5,7.5,10,25,50],diverging=True,cblabel='Diff sum(level 1-n)-level0 in Production of SOA [ug m-2 hr-1]')
+	f,a,cb=seasonal_maps(np.squeeze(np.sum(data[EXPS[0]][3][1,:,:,:,:,:],axis=(0,2)))*1e9*3600,[0.01,0.1,0.5,1.0,2.5,5,7.5,10,25,50,75,150,500],diverging=False,cblabel='Production of SOA [ug m-2 hr-1]')
+	f.savefig(output_png_path+'/production/NEWSOA_production_SOA.png',dpi=400)
+	#f,a,cb=seasonal_maps((np.squeeze(np.sum(data[EXPS[0]][3][1,:,:,1:,:,:],axis=(0,2)))-np.squeeze(np.sum(data[EXPS[0]][3][1,:,:,0,:,:],axis=0)))*1e9*3600,[-50,-25,-10,-7.5,-5,-2.5,-1.0,-0.5,-0.1,-0.01,0.01,0.1,0.5,1.0,2.5,5,7.5,10,25,50],diverging=True,cblabel='Diff sum(level 1-n)-level0 in Production of SOA [ug m-2 hr-1]')
 
 	f,a,cb=seasonal_maps(np.squeeze(data[EXPS[0]][3][1,0,:,0,:,:])*1e9*3600,[0.01,0.1,0.5,1.0,2.5,5,7.5,10,25,50,75],diverging=False,cblabel='Production of ELVOC [ug m-2 hr-1]')
-	f.savefig(output_png_path+'/production/NEWSOA_production_ELVOC.png',dpi=400)
+	f.savefig(output_png_path+'/figS5_NEWSOA_production_ELVOC.png',dpi=400)
 	f,a,cb=seasonal_maps(np.squeeze(data[EXPS[0]][3][1,1,:,0,:,:])*1e9*3600,[0.01,0.1,0.5,1.0,2.5,5,7.5,10,25,50,75],diverging=False,cblabel='Production of SVOC [ug m-2 hr-1]')
-	f.savefig(output_png_path+'/production/NEWSOA_production_SVOC.png',dpi=400)
-	f,a=plt.subplots(1)
-	print np.squeeze(np.sum(data[EXPS[0]][3][1,:,:,0,:,:],axis=0)).mean(2).shape,np.linspace(0,33,34).shape,lat.shape,np.squeeze(np.sum(data[EXPS[0]][3][1,:,:,:,:,:],axis=0)).mean(0).mean(-1).max()*1e9*3600
-	levs,lats=np.meshgrid(np.linspace(0,33,34),lat)
-	#a.pcolormes(lat,np.linspace(0,33,34),np.squeeze(np.sum(data[EXPS[0]][3][1,:,:,:,:,:],axis=0)).mean(0).mean(-1)*1e9*3600)
-	bounds=[0,0.25,0.5,0.75,1.0,1.5,2,2.5,3,4,4.5,5,5.5]
-	mycmap=plt.cm.get_cmap('Greens',len(bounds))
-	normi = mpl.colors.BoundaryNorm(bounds, len(bounds))
-	im=a.pcolormesh(lats,levs,np.squeeze(np.sum(data[EXPS[0]][3][1,:,:,:,:,:],axis=0)).mean(0).mean(-1).transpose()*1e9*3600,norm=normi,cmap=mycmap)
-	plt.colorbar(im)
+	f.savefig(output_png_path+'/figS6_NEWSOA_production_SVOC.png',dpi=400)
+	# f,a=plt.subplots(1)
+	# print np.squeeze(np.sum(data[EXPS[0]][3][1,:,:,0,:,:],axis=0)).mean(2).shape,np.linspace(0,33,34).shape,lat.shape,np.squeeze(np.sum(data[EXPS[0]][3][1,:,:,:,:,:],axis=0)).mean(0).mean(-1).max()*1e9*3600
+	# levs,lats=np.meshgrid(np.linspace(0,33,34),lat)
+	# #a.pcolormes(lat,np.linspace(0,33,34),np.squeeze(np.sum(data[EXPS[0]][3][1,:,:,:,:,:],axis=0)).mean(0).mean(-1)*1e9*3600)
+	# bounds=[0,0.25,0.5,0.75,1.0,1.5,2,2.5,3,4,4.5,5,5.5]
+	# mycmap=plt.cm.get_cmap('Greens',len(bounds))
+	# normi = mpl.colors.BoundaryNorm(bounds, len(bounds))
+	# im=a.pcolormesh(lats,levs,np.squeeze(np.sum(data[EXPS[0]][3][1,:,:,:,:,:],axis=0)).mean(0).mean(-1).transpose()*1e9*3600,norm=normi,cmap=mycmap)
+	# plt.colorbar(im)
 	fsoa=nc.Dataset('/Users/bergmant/Documents/tm5-soa/output/SOA.nc','r')
 	olddata=fsoa.variables['FIELD'][:]
 	gb1d=fsoa.variables['GRIDBOX_AREA'][:]
@@ -503,25 +549,25 @@ if __name__=='__main__':
 		oldTM5[k,:,:]=oldTM5[k,:,:]/(gb[:,:]*24.0*monthlengths[k]*3600)*2.4/1.15
 
 	f,a,cb=seasonal_maps(np.squeeze(oldTM5)*1e9*3600,[0.01,0.1,0.5,1.0,2.5,5,7.5,10,25,50,75,150,250,500],diverging=False,cblabel='emis (OLDSOA) of SOA [ug m-2 hr-1]')
-	f.savefig(output_png_path+'/production/OLDSOA_production_SOA.png',dpi=400)
+	f.savefig(output_png_path+'/figS4_OLDSOA_production_SOA.png',dpi=400)
 	print data[EXPS[0]][3][1,:,:,0,:,:].shape
 	hdata=np.squeeze(np.sum(data[EXPS[0]][3][1,:,:,0,:,:],axis=0))*1e9*3600
 	f,a,cb=seasonal_maps((hdata-np.squeeze(oldTM5)*1e9*3600),[-50,-25,-10,-7.5,-5,-2.5,-1.0,-0.5,-0.1,-0.01,0.01,0.1,0.5,1.0,2.5,5,7.5,10,25,50],diverging=True,cblabel='emis (OLDSOA) of SOA [ug m-2 hr-1]')
-	f.savefig(output_png_path+'/production/NEWSOA-OLDSOA_production_SOA.png',dpi=400)
+	f.savefig(output_png_path+'figS2_NEWSOA-OLDSOA_production_SOA.png',dpi=400)
 	
 	hdata=np.squeeze(np.sum(data[EXPS[0]][3][1,:,:,:,:,:],axis=(0,2)))#*1e9*3600
 	oldie=oldTM5.copy()
 	oldie[oldTM5==0]=1
 	f,a,cb=seasonal_maps((hdata-np.squeeze(oldTM5))/np.squeeze(oldie)*100,[-150,-100,-75,-50,-25,-10,-7.5,-5,5,7.5,10,25,50,75,100,150],diverging=True,cblabel='change in production [%]')
-	f.savefig(output_png_path+'/production/NEWSOA-OLDSOA_production_SOA_percentage.png',dpi=400)
+	f.savefig(output_png_path+'figS3_NEWSOA-OLDSOA_production_SOA_percentage.png',dpi=400)
 	
-	hdata=np.squeeze(np.sum(data[EXPS[0]][3][1,:,:,1,:,:],axis=0))*1e9*3600
-	f,a,cb=seasonal_maps((hdata-np.squeeze(oldTM5)*1e9*3600),[-50,-25,-10,-7.5,-5,-2.5,-1.0,-0.5,-0.1,-0.01,0.01,0.1,0.5,1.0,2.5,5,7.5,10,25,50],diverging=True,cblabel='emis (OLDSOA) of SOA [ug m-2 hr-1]')
-	hdata=np.squeeze(np.sum(data[EXPS[0]][3][1,:,:,2,:,:],axis=0))*1e9*3600
-	f,a,cb=seasonal_maps((hdata-np.squeeze(oldTM5)*1e9*3600),[-50,-25,-10,-7.5,-5,-2.5,-1.0,-0.5,-0.1,-0.01,0.01,0.1,0.5,1.0,2.5,5,7.5,10,25,50],diverging=True,cblabel='emis (OLDSOA) of SOA [ug m-2 hr-1]')
+	#hdata=np.squeeze(np.sum(data[EXPS[0]][3][1,:,:,1,:,:],axis=0))*1e9*3600
+	#f,a,cb=seasonal_maps((hdata-np.squeeze(oldTM5)*1e9*3600),[-50,-25,-10,-7.5,-5,-2.5,-1.0,-0.5,-0.1,-0.01,0.01,0.1,0.5,1.0,2.5,5,7.5,10,25,50],diverging=True,cblabel='emis (OLDSOA) of SOA [ug m-2 hr-1]')
+	#hdata=np.squeeze(np.sum(data[EXPS[0]][3][1,:,:,2,:,:],axis=0))*1e9*3600
+	#f,a,cb=seasonal_maps((hdata-np.squeeze(oldTM5)*1e9*3600),[-50,-25,-10,-7.5,-5,-2.5,-1.0,-0.5,-0.1,-0.01,0.01,0.1,0.5,1.0,2.5,5,7.5,10,25,50],diverging=True,cblabel='emis (OLDSOA) of SOA [ug m-2 hr-1]')
 	hdata2=np.squeeze(np.sum(data[EXPS[0]][3][1,:,:,:,:,:],axis=(0,2)))*1e9*3600
-	f,a,cb=seasonal_maps((hdata2-np.squeeze(oldTM5)*1e9*3600),[-150,-50,-25,-10,-7.5,-5,-2.5,-1.0,-0.5,-0.1,-0.01,0.01,0.1,0.5,1.0,2.5,5,7.5,10,25,50,150],diverging=True,cblabel='emis (OLDSOA) of SOA [ug m-2 hr-1]')
-	f.savefig(output_png_path+'/production/NEWSOA-OLDSOA_production_SOA.png',dpi=400)
+	f,a,cb=seasonal_maps((hdata2-np.squeeze(oldTM5)*1e9*3600),[-150,-50,-25,-10,-7.5,-5,-2.5,-1.0,-0.5,-0.1,-0.01,0.01,0.1,0.5,1.0,2.5,5,7.5,10,25,50,150],diverging=True,cblabel='Difference in SOA production [ug m-2 hr-1]')
+	f.savefig(output_png_path+'figS4_NEWSOA-OLDSOA_production_SOA.png',dpi=400)
 
 	print (np.squeeze(np.sum(data[EXPS[0]][3][1,:,:,1:,:,:],axis=(0,2))).mean(0)*gb*3600*24*365).sum()	
 	print (np.squeeze(np.sum(data[EXPS[0]][3][1,:,:,:,:,:],axis=(0,2))).mean(0)*gb*3600*24*365).sum()
@@ -532,36 +578,36 @@ if __name__=='__main__':
 		#print (np.squeeze(np.sum(data[EXPS[0]][3][1,:,:,ilev,:,:],axis=0)).mean(0)*gb*3600*24*365).sum()
 		prodlev[ilev]=(np.squeeze(np.sum(data[EXPS[0]][3][1,:,:,ilev,:,:],axis=0)).mean(0)*gb*3600*24*365).sum()
 		#prodlev2[ilev]
-	f,a=plt.subplots(ncols=2)
-	a[0].plot(prodlev/1e9,np.linspace(1,35,34),'r')
-	prodlev_old[0]=(np.squeeze(oldTM5)*gb).sum()*3600*24*365*0.8/12
-	prodlev_old[1]=(np.squeeze(oldTM5)*gb).sum()*3600*24*365*0.2/12
-	a[0].plot(prodlev_old/1e9,np.linspace(1,35,34),'b')
-	a[0].set_xlabel('SOA production [Tg yr$^{-1}$]')
-	a[0].set_ylabel('Model level')
-	#plt.figure()
-	a[1].plot(prodlev/prodlev.sum()*100,np.linspace(1,35,34),'r')
-	a[1].plot(prodlev_old/prodlev_old.sum()*100,np.linspace(1,35,34),'b')
-	a[1].set_xlabel('Fraction of total SOA production [%]')
-	a[1].set_ylabel('Model level')
-	f.savefig(output_png_path+'/production/production_SOA_vertical.png',dpi=600)
+	# f,a=plt.subplots(ncols=2)
+	# a[0].plot(prodlev/1e9,np.linspace(1,35,34),'r')
+	# prodlev_old[0]=(np.squeeze(oldTM5)*gb).sum()*3600*24*365*0.8/12
+	# prodlev_old[1]=(np.squeeze(oldTM5)*gb).sum()*3600*24*365*0.2/12
+	# a[0].plot(prodlev_old/1e9,np.linspace(1,35,34),'b')
+	# a[0].set_xlabel('SOA production [Tg yr$^{-1}$]')
+	# a[0].set_ylabel('Model level')
+	# #plt.figure()
+	# a[1].plot(prodlev/prodlev.sum()*100,np.linspace(1,35,34),'r')
+	# a[1].plot(prodlev_old/prodlev_old.sum()*100,np.linspace(1,35,34),'b')
+	# a[1].set_xlabel('Fraction of total SOA production [%]')
+	# a[1].set_ylabel('Model level')
+	# f.savefig(output_png_path+'/production/production_SOA_vertical.png',dpi=600)
 
-	plt.plot()
-	plt.figure()
-	plt.semilogx(prodlev,np.linspace(1,35,34))
+	# plt.plot()
+	# plt.figure()
+	# plt.semilogx(prodlev,np.linspace(1,35,34))
 
-	#plt.show()
-	print prodlev[2:].sum()/prodlev.sum()*100
-	print prodlev_old[2:].sum()/prodlev_old.sum()*100
+	# #plt.show()
+	# print prodlev[2:].sum()/prodlev.sum()*100
+	# print prodlev_old[2:].sum()/prodlev_old.sum()*100
 	
 
 
-	f,ax=plt.subplots(1)
+	# f,ax=plt.subplots(1)
 	
-	levels=	[-2,-1,-0.5,-0.1,-0.05,-0.01,0.01,0.05,0.1,0.5,1,2]
-	mapit_boundary((np.squeeze(np.sum(data[EXPS[0]][3][1,:,:,:,:,:],axis=(0,2)))-np.squeeze(oldTM5)).mean(0)*1e3*3600*24*365,levels,ax,True,cblabel='Difference in production [g m$^{-2}$ yr$^{-1}$]')
-	ax.set_title('Difference in production')
-	f.savefig(output_png_path+'/production/NEWSOA-OLDSOA_annual_production_SOA.png',dpi=400)
+	# levels=	[-2,-1,-0.5,-0.1,-0.05,-0.01,0.01,0.05,0.1,0.5,1,2]
+	# mapit_boundary((np.squeeze(np.sum(data[EXPS[0]][3][1,:,:,:,:,:],axis=(0,2)))-np.squeeze(oldTM5)).mean(0)*1e3*3600*24*365,levels,ax,True,cblabel='Difference in production [g m$^{-2}$ yr$^{-1}$]')
+	# ax.set_title('Difference in production')
+	# f.savefig(output_png_path+'/production/NEWSOA-OLDSOA_annual_production_SOA.png',dpi=400)
 	f,ax=plt.subplots(nrows=2,ncols=2,figsize=(12,8))
 	print np.shape(data[EXPS[0]][3])
 	#NEWSOA
@@ -574,30 +620,30 @@ if __name__=='__main__':
 	mapit_boundary((np.squeeze(np.sum(data[EXPS[0]][3][1,:,:,:,:,:],axis=(0,2)))-np.squeeze(oldTM5)).mean(0)*1e3*3600*24*365,[-2,-1,-0.5,-0.1,-0.05,-0.01,0.01,0.05,0.1,0.5,1,2],ax[1,1],True,cblabel='??????Difference in production [g m$^{-2}$ yr$^{-1}$]')
 	f.savefig(output_png_path+'/production/annual-production-SOA-2x2.png',dpi=400)
 	
-	f,ax=subplots(3)
-	print np.squeeze(np.mean(data[EXPS[0]][2][2,1,:,:,:],axis=(0))).shape
-	print type(np.squeeze(np.mean(data[EXPS[0]][2][2,1,:,:,:],axis=(0)))*1e3*3600*24*365)
-	mapit_boundary(np.squeeze(np.mean(data[EXPS[0]][2][2,1,:,:,:],axis=(0)))*1e3*3600*24*365,[0.01,0.05,0.1,0.5,1,2],ax[0],False,cblabel='wetsoa [g m$^{-2}$ yr$^{-1}$]')
-	mapit_boundary(np.squeeze(np.mean(data[EXPS[1]][2][2,1,:,:,:],axis=(0)))*1e3*3600*24*365,[0.01,0.05,0.1,0.5,1,2],ax[1],False,cblabel='wetsoa [g m$^{-2}$ yr$^{-1}$]')
-	mapit_boundary(np.squeeze(np.mean(data[EXPS[0]][2][2,1,:,:,:],axis=(0))-np.mean(data[EXPS[1]][2][2,1,:,:,:],axis=(0)))*1e3*3600*24*365,[-2,-1,-0.5,-0.1,-0.05,-0.01,0.01,0.05,0.1,0.5,1,2],ax[2],True,cblabel='wetsoa [g m$^{-2}$ yr$^{-1}$]')
+	# f,ax=subplots(3)
+	# print np.squeeze(np.mean(data[EXPS[0]][2][2,1,:,:,:],axis=(0))).shape
+	# print type(np.squeeze(np.mean(data[EXPS[0]][2][2,1,:,:,:],axis=(0)))*1e3*3600*24*365)
+	# mapit_boundary(np.squeeze(np.mean(data[EXPS[0]][2][2,1,:,:,:],axis=(0)))*1e3*3600*24*365,[0.01,0.05,0.1,0.5,1,2],ax[0],False,cblabel='wetsoa [g m$^{-2}$ yr$^{-1}$]')
+	# mapit_boundary(np.squeeze(np.mean(data[EXPS[1]][2][2,1,:,:,:],axis=(0)))*1e3*3600*24*365,[0.01,0.05,0.1,0.5,1,2],ax[1],False,cblabel='wetsoa [g m$^{-2}$ yr$^{-1}$]')
+	# mapit_boundary(np.squeeze(np.mean(data[EXPS[0]][2][2,1,:,:,:],axis=(0))-np.mean(data[EXPS[1]][2][2,1,:,:,:],axis=(0)))*1e3*3600*24*365,[-2,-1,-0.5,-0.1,-0.05,-0.01,0.01,0.05,0.1,0.5,1,2],ax[2],True,cblabel='wetsoa [g m$^{-2}$ yr$^{-1}$]')
 	
-	f,aa=plt.subplots(1)
 	terp=nc.Dataset(output+'/general_TM5_newsoa-ri_2010.mm.nc','r')['emiterp']
 	isop=nc.Dataset(output+'/general_TM5_newsoa-ri_2010.mm.nc','r')['emiisop']
-	print terp.shape
-	terp2=terp[:,:,:]*gb
-	isop2=isop[:,:,:]*gb
-	terpzon=terp2[:,75:,:].sum(axis=(1,2))
-	isopzon=isop2[:,75:,:].sum(axis=(1,2))
-	oldterp=oldTM5[:,:,:]/0.15/2.4*1.15
-	oldterp2=oldTM5[:,:,:]*gb/0.15/2.4*1.15
+	# f,aa=plt.subplots(1)
+	# print terp.shape
+	# terp2=terp[:,:,:]*gb
+	# isop2=isop[:,:,:]*gb
+	# terpzon=terp2[:,75:,:].sum(axis=(1,2))
+	# isopzon=isop2[:,75:,:].sum(axis=(1,2))
+	# oldterp2=oldTM5[:,:,:]*gb/0.15/2.4*1.15
 	
-	oldterpzon=oldterp2[:,75:,:].sum(axis=(1,2))
-	print 'lat 75',lat[75]
-	aa.plot(terpzon,'r')
-	aa.plot(isopzon,'--r')
-	aa.plot(oldterpzon,'b')
+	# oldterpzon=oldterp2[:,75:,:].sum(axis=(1,2))
+	# print 'lat 75',lat[75]
+	# aa.plot(terpzon,'r')
+	# aa.plot(isopzon,'--r')
+	# aa.plot(oldterpzon,'b')
 	fmapvoc,ax=plt.subplots(nrows=2,ncols=2,figsize=(16,10))
+	oldterp=oldTM5[:,:,:]/0.15/2.4*1.15
 	sumterp=np.zeros((12,90,120))
 	sumisop=np.zeros((12,90,120))
 	sumoldterp=np.zeros((12,90,120))
@@ -620,7 +666,7 @@ if __name__=='__main__':
 			ax[i,j].annotate(string.ascii_lowercase[k]+')',xy=(0.01,0.95),xycoords='axes fraction',fontsize=18)
 			k+=1
 
-	fmapvoc.savefig(output_png_path+'/production/annual_emi_terp_isop.png',dpi=400)
+	fmapvoc.savefig(output_png_path+'/fig2_annual_emi_terp_isop.png',dpi=400)
 
 	# f,aa=plt.subplots(1)
 	
