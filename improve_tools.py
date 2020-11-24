@@ -109,9 +109,8 @@ def read_radius(inputdata):
 	data=nc.Dataset(inputdata,'r')
 	output={}
 	for imode in modes:
-		print 'RWET_'+imode
+		#print 'RWET_'+imode
 		output['RWET_'+imode]=data.variables['RWET_'+imode]
-	print output	
 	return output
 def calc_dens(inputdata):
 	data=nc.Dataset(inputdata,'r')
@@ -134,7 +133,7 @@ def calc_dens(inputdata):
 		for c in comps:
 			indexi='M_'+c+m 
 			if indexi in data.variables:
-				print  indexi
+				#print  indexi
 				mass+=data.variables[indexi][:]
 				roo+=data.variables[indexi][:]*densities[c]
 		#if m in h2o:
@@ -175,7 +174,6 @@ def read_mass(comp,inputdata,rad=1.25):
 	data=nc.Dataset(inputdata,'r')
 	outputdataset=None
 	rwetdata=read_radius(inputdata)
-	print rwetdata
 	modfrac={}
 	hr2=(0.5*np.sqrt(2.0))
 	for mode in modesigma:
@@ -186,42 +184,7 @@ def read_mass(comp,inputdata,rad=1.25):
 		z=(np.log(rad)-np.log(rdata*1e6*cmedr2mmedr)/np.log(modesigma[mode]))
 		print z, rad,rdata,cmedr2mmedr
 		modfrac[mode]=0.5+0.5*erf(z*hr2)
-		print 'modfrac',mode, np.mean(modfrac[mode])
-		#print mode,np.where(rwetdata['RWET_'+mode][:]<1e-20)
-		#data=np.where(rwetdata['RWET_'+mode][:]<1e-20,1e-10,rwetdata['RWET_'+mode][:])
-		print mode,np.where(rdata<1e-20)
-		#print mode,np.where(rwetdata['RWET_'+mode][:]<1e-20)
-		#raw_input()
-	# select mass below threshold
-	#ACS
 
-
-	# hr2=(0.5*np.sqrt(2.0))
-	# modfrac={}
-	# rACS=data.variables['RWET_ACS'][:]
-	# completedata['RWET_ACS']=rACS
- # 	cmedr2mmedr= np.exp(3.0*(np.log(1.59)**2))	
-	# z=(np.log(rad)-np.log(rACS*1e6*cmedr2mmedr)/np.log(1.59))
-	# print 0.5+0.5*erf(z*hr2)
-	# raw_input()
-	# modfrac['ACS']=0.5+0.5*erf(z*hr2)
-	# #free memory
-	# del rACS,z
-	# #COS
-	# rCOS=data.variables['RWET_COS'][:]
-	# completedata['RWET_COS']=rCOS
-	# cmedr2mmedr= np.exp(3.0*(np.log(2.00)**2))	
-	# z=(np.log(rad)-np.log(rCOS*1e6*cmedr2mmedr)/np.log(2.00))
-	# modfrac['COS']=0.5+0.5*erf(z*hr2)
-	# del rCOS,z
-
-	# rAIS=data.variables['RWET_AIS'][:]
-	# completedata['RWET_AIS']=rAIS
-	# cmedr2mmedr= np.exp(3.0*(np.log(1.59)**2))	
-	# z=(np.log(rad)-np.log(rAIS*1e6*cmedr2mmedr)/np.log(1.59))
-	# modfrac['AIS']=0.5+0.5*erf(z*hr2)
-	# #free memory
-	# del rAIS,z
 	modes=['NUS','AIS','ACS','COS','AII','ACI','COI']
 	#modes=['NUS','AIS']#,'ACS','COS','AII','ACI','COI']
 	outputmodes={}
@@ -260,9 +223,6 @@ def read_mass(comp,inputdata,rad=1.25):
 			else:
 				print('something wrong, mode unknown',imode)
 				break
-	#raw_input()
-	print outputmodes.keys()
-	print outputmodes
 
 	return outputdata,outputmodes
 def improve(filein='/Users/bergmant/Documents/obs-data/improve2010/improvedata.20170626.txt'):
@@ -477,11 +437,6 @@ def col_improve(modeldata,timeaxis,sitedata):
 					break 
 				##otherwise continue to next obs data point (date)
 
-			# if len(sitedata[i][6][0])>1:
-			# 	obs=sitedata[i][6][1][:len(model_mean),1]
-			# 	if len(model_mean)>0:
-			# 		MFBm= MFB(obs,model_mean)
-			# 		MFEm= MFE(obs,model_mean)
 
 				
 			yearmean_model.append(np.mean(model_mean))
@@ -500,619 +455,79 @@ def col_improve(modeldata,timeaxis,sitedata):
 			nctime.append(time1)
 			#print sitedata[i][0]
 	return (ncmodel,ncnames,nctime,model_dict)
+def read_model_data(exp,sitedata,logger,basepathprocessed='/Users/bergmant/Documents/tm5-SOA/output/processed/',basepathraw='/Users/bergmant/Documents/tm5-SOA/output/raw/'):
+	logger.info('Processing experiment %s ',exp )
+	#print len(glob.glob(path_improve_col+exp+'*'))
+	#print len(glob.glob(path_improve_col+'*'))
+	logger.debug(path_improve_col+exp+'*')
+	if not os.path.isdir(path_improve_col):
+		logger.debug('Processing experiment %s ',exp )
+		os.mkdir(path_improve_col)
+	if len(glob.glob(path_improve_col+exp+'*'))==0:# and len(glob.glob(basepath+'emep_col/'+exp+'*'))==0:
+		if  os.path.exists(basepathraw+exp+'/general_TM5_'+exp+'_2010.lev1.nc'):
+			filepath=basepathraw+exp+'/general_TM5_'+exp+'_2010.lev1.nc'
+		else:	
+			filepath='/Volumes/Utrecht/'+exp+'/general_TM5_'+exp+'_2010.lev1.nc'			
+		####READ
+		print 'reading simulated radii'
+		RW=improve_tools.read_radius(filepath)
 
+		radius_pm25=1.25
 
-# def main():
-# 	#output_pdf_path='/Users/bergmant/Documents/tm5-SOA/figures/pdf/IMPROVE/'
-# 	#output_png_path='/Users/bergmant/Documents/tm5-SOA/figures/png/IMPROVE/'
-# 	#output_jpg_path='/Users/bergmant/Documents/tm5-SOA/figures/jpg/IMPROVE/'
-# 	## get IMPROVE observations
-# 	#basepath='/Users/bergmant/Documents/tm5-SOA/output/processed/'
-# 	sitedata=improve()
-# 	#for exp in ['soa-riccobono','oldsoa-final','nosoa']:
-# 	EXPS=['soa-riccobono','oldsoa-final','nosoa']
-# 	EXPS=['newsoa-ri','oldsoa-bhn']#,'nosoa']
-# 	#EXPS=['test']#,'nosoa']
-# 	col_path=basepathprocessed+'improve_col2/'	
-# 	for exp in EXPS:
-# 		print exp
-# 		print len(glob.glob(col_path+exp+'*'))
-# 		if not os.path.isdir(col_path):
-# 			os.mkdir(col_path)
-# 		if len(glob.glob(col_path+exp+'*'))==0:# and len(glob.glob(basepath+'emep_col/'+exp+'*'))==0:
-# 			filepath='/Volumes/Utrecht/'+exp+'/general_TM5_'+exp+'_2010.lev1.nc'
-# 			#testidata:
-# 			#filepath='general_TM5_test_2010.lev1.nc'
-# 			# 
-# 			print 'read radius'
-# 			test=read_radius(filepath)
-# 			r_pm25=1.25
-# 			print 'read soa'
-# 			soamassexp=read_mass('M_SOA',filepath,r_pm25) 
-# 			print 'read oc'
-# 			pommassexp=read_mass('M_POM',filepath,r_pm25)
-# 			print 'sum'	
-# 			poamass=soamassexp+pommassexp
+		print 'read soa'
+		logger.info('Reading SOA for experiment %s from %s',exp, filepath )
+		soamassexp,soamodesexp=improve_tools.read_mass('M_SOA',filepath,radius_pm25) 
+		print 'read oc'
+		pommassexp,pommodesexp=improve_tools.read_mass('M_POM',filepath,radius_pm25)
+		print 'sum'	
+		poamass=soamassexp+pommassexp
+		print soamodesexp
+		print 'time'
+		oamass=[]
+		oamass.append(soamassexp+pommassexp)
+
+		timeaxis_o=nc.Dataset(filepath,'r').variables['time'][:]
+		lon_o=nc.Dataset(filepath,'r').variables['lon'][:]
+		lat_o=nc.Dataset(filepath,'r').variables['lat'][:]
+		t_unit=nc.Dataset(filepath,'r').variables['time'].units
+		## day of year, model data starts from day 0 so add 1
+		timeaxis=timeaxis_o-np.floor(timeaxis_o[0])+1
+		dt_axis=nc.num2date(timeaxis_o[:],units = t_unit,calendar = 'gregorian')[:]
+
+		#dt_ax2=[]
+		#dt_ax2=[nc.num2date(x,units = t_unit,calendar = 'gregorian') for x in timeaxis_o]
+		logger.debug('time axes, length %s, first value %s, type %s',len(dt_axis),dt_axis[0],type(dt_axis[0]))
+		#raw_input()
+		#Collocate total oa	
+		ncmodel,ncname,nctime,model_site=improve_tools.col_improve(poamass,timeaxis,sitedata)
+		modetest={}
+		for i in soamodesexp:
+			test,nn,nt,ms=improve_tools.col_improve(soamodesexp[i],timeaxis,sitedata)
+			print 'fsdfasdf',i,test,nn,nt 
+			print i,nn,nt
+			modetest[i]=test
+			#raw_input()
+		#ncmodel_pom,ncname_pom,nctime,model_site=improve_tools.col_improve(pommassexp,timeaxis,sitedata)
+			for data,name,time,sdata in zip(test,nn,nt,ms):
+				print 'time',time
+				write_netcdf_file([data],[name],path_improve_col+exp+'_'+i+'_'+name+'.nc',None,None,np.array(time))#,lat,lon)
+							#### select!
+		for i in RW:
+			RW2,nn,nt,ms=improve_tools.col_improve(RW[i],timeaxis,sitedata)
+			for data,name,time,sdata in zip(RW2,nn,nt,ms):
+				write_netcdf_file([data],[name],path_improve_col+exp+'_'+i+'_'+name+'.nc',None,None,np.array(time))#,lat,lon)
+		
+		for data,name,time,sdata in zip(ncmodel,ncname,nctime,model_site):
+			write_netcdf_file([data],[name],path_improve_col+exp+'_'+name+'.nc',None,None,np.array(time))#,lat,lon)
+		
+		#collocate primary oa
+		ncmodel_pom,ncname_pom,nctime,model_site=improve_tools.col_improve(pommassexp,timeaxis,sitedata)
+		for data,name,time,sdata in zip(ncmodel_pom,ncname,nctime,model_site):
+			write_netcdf_file([data],[name],path_improve_col+exp+'_pom_'+name+'.nc',None,None,np.array(time))#,lat,lon)
+		#collocate secondary oa
+		ncmodel_soa,ncname_soa,nctime,model_site=improve_tools.col_improve(soamassexp,timeaxis,sitedata)
+		for data,name,time,sdata in zip(ncmodel_soa,ncname,nctime,model_site):
+			write_netcdf_file([data],[name],path_improve_col+exp+'_soa_'+name+'.nc',None,None,np.array(time))#,lat,lon)
 			
-# 			print 'time'
-# 			oamass=[]
-# 			oamass.append(soamassexp+pommassexp)
-# 			timeaxis_o=nc.Dataset(filepath,'r').variables['time'][:]
-# 			lon_o=nc.Dataset(filepath,'r').variables['lon'][:]
-# 			lat_o=nc.Dataset(filepath,'r').variables['lat'][:]
-# 			t_unit=nc.Dataset(filepath,'r').variables['time'].units
-# 			## day of year, model data starts from day 0 so add 1
-# 			timeaxis=timeaxis_o-np.floor(timeaxis_o[0])+1
-# 			dt_axis=nc.num2date(timeaxis_o[:],units = t_unit,calendar = 'gregorian')[:]
-# 			dt_ax2=[]
-# 			dt_ax2=[nc.num2date(x,units = t_unit,calendar = 'gregorian') for x in timeaxis_o]
 
-
-# 			ncmodel,ncname,nctime,model_site=col_improve(poamass,timeaxis,sitedata)
-
-# 			## total oa
-# 			for data,name,time,sdata in zip(ncmodel,ncname,nctime,model_site):
-# 				print 'time',time
-# 				write_netcdf_file([data],[name],col_path+exp+'_'+name+'.nc',None,None,np.array(time))#,lat,lon)
-
-# 			## primary oa
-# 			ncmodel_pom,ncname_pom,nctime,model_site=col_improve(pommassexp,timeaxis,sitedata)
-# 			for data,name,time,sdata in zip(ncmodel_pom,ncname,nctime,model_site):
-# 				print 'time',time
-# 				write_netcdf_file([data],[name],col_path+exp+'_pom_'+name+'.nc',None,None,np.array(time))#,lat,lon)
-# 			## secondary oa
-# 			ncmodel_soa,ncname_soa,nctime,model_site=col_improve(soamassexp,timeaxis,sitedata)
-# 			for data,name,time,sdata in zip(ncmodel_soa,ncname,nctime,model_site):
-# 				print 'time',time
-# 				write_netcdf_file([data],[name],col_path+exp+'_soa_'+name+'.nc',None,None,np.array(time))#,lat,lon)
-# 			for i in range(len(ncname)):
-# 				print ncname[i],ncname_pom[i]
-# 	meanmodelmon={}
-# 	meanmodelmon_pom={}
-# 	print sitedata
-# 	#sitepanda=pd.DataFrame.from_dict(sitedata)
-# 	#print sitepanda.index
-
-# 	#raw_input()
-# 	for exp in EXPS:
-# 		meanmodelmon[exp]=np.zeros((len(sitedata.keys()),12))
-# 		meanmodelmon_pom[exp]=np.zeros((len(sitedata.keys()),12))
-# 	meanmodelmon['obs']=np.zeros((len(sitedata.keys()),12))
-# 	#meanobsmon=np.zeros((sitedata.keys().len,12))
-# 	kk=0
-# 	yearmean_model={}
-# 	yearmean_modelpom={}
-	
-# 	for i in sitedata:
-# 		print i
-# 		f,a=plt.subplots(1)
-# 		fmon,amon=plt.subplots(1)
-# 		obs=sitedata[i][6][1][:,1]
-# 		timedata=sitedata[i][6][0][:]
-# 		monthindices={1:[],2:[],3:[],4:[],5:[],6:[],7:[],8:[],9:[],10:[],11:[],12:[]}
-# 		monthdata=np.zeros([12])
-# 		monthdata[:]=np.NAN
-# 		modelmonthdata=np.zeros([12])
-# 		modelmonthdata[:]=np.NAN
-# 		modelmonthdata_pom=np.zeros([12])
-# 		modelmonthdata_pom[:]=np.NAN
-# 		for j in timedata:
-# 			print j.month
-# 			monthindices[j.month].append(timedata.index(j))
-# 		for k in monthindices:
-# 			print monthdata.shape,monthindices[k],(sitedata[i][6][1][monthindices[k],1]),np.mean(sitedata[i][6][1][monthindices[k],1])
-# 			monthdata[k-1]=np.mean(sitedata[i][6][1][monthindices[k],1])
-# 		print monthindices[1]
-# 		print monthdata
-# 		print monthdata.shape
-# 		print meanmodelmon['obs']
-# 		print type(meanmodelmon['obs'])
-# 		meanmodelmon['obs'][kk,:]=monthdata[:]
-			
-# 		amon.plot(np.linspace(1,12,12),monthdata)
-# 		a.plot(timedata,obs,'k')
-# 		for exp in EXPS:
-# 			print i
-# 			model=nc.Dataset(col_path+exp+'_'+i+'.nc','r').variables[i][:]
-# 			model_pom=nc.Dataset(col_path+exp+'_pom_'+i+'.nc','r').variables[i][:]
-# 			print model,col_path+exp+'_'+i+'.nc'
-# 			for kmod in monthindices:
-# 				print kmod
-# 				print model
-# 				#raw_input()
-# 				print monthindices
-# 				print monthdata.shape,monthindices[kmod],(model[monthindices[kmod]]),np.mean(model[monthindices[kmod]])
-
-# 				modelmonthdata[kmod-1]=np.mean(model[monthindices[kmod]])
-# 				modelmonthdata_pom[kmod-1]=np.mean(model_pom[monthindices[kmod]])
-# 			print modelmonthdata
-# 			meanmodelmon[exp][kk,:]=modelmonthdata
-# 			meanmodelmon_pom[exp][kk,:]=modelmonthdata_pom
-# 			amon.plot(np.linspace(1,12,12),modelmonthdata,'r',ls='-')		
-# 			amon.plot(np.linspace(1,12,12),modelmonthdata_pom,c='r',ls='--')		
-# 			print len(obs)
-# 			mfb=MFB(obs,model)
-# 			mfe=MFE(obs,model)
-# 			nmb=NMB(obs,model)
-# 			nme=NME(obs,model)
-# 			rmse=RMSE(obs,model)
-# 			r=pearsonr(monthdata,modelmonthdata)
-# 			mfbmon=MFB(monthdata,modelmonthdata)
-# 			mfemon=MFE(monthdata,modelmonthdata)
-# 			nmbmon=NMB(monthdata,modelmonthdata)
-# 			nmemon=NME(monthdata,modelmonthdata)
-# 			rmsemon=RMSE(monthdata,modelmonthdata)
-# 			rmon=pearsonr(monthdata,modelmonthdata)
-# 			print r
-# 			#model=model_site[i]['OM']		
-# 			if exp==EXPS[0]:
-# 				X=0.05
-# 				colori='r'
-# 			elif exp==EXPS[1]:
-# 				X=0.8
-# 				colori='b'
-# 			else:# exp==EXPS[1]:
-# 				X=0.4
-# 				colori='g'
-# 			amon.plot(np.linspace(1,12,12),modelmonthdata,c=colori,ls='-')		
-# 			amon.plot(np.linspace(1,12,12),modelmonthdata_pom,c=colori,ls='--')		
-# 			amon.set_title(i)
-# 			a.plot(timedata,model,colori)
-# 			a.annotate('EXP: '+exp,xy=(X,0.95),xycoords='axes fraction')
-# 			a.annotate(('MFB: %6.2f')%mfb,xy=(X,0.9),xycoords='axes fraction')
-# 			a.annotate(('MFE: %6.2f')%mfe,xy=(X,0.85),xycoords='axes fraction')
-# 			a.annotate(('NMB: %6.2f')%nmb,xy=(X,0.8),xycoords='axes fraction')
-# 			a.annotate(('NME: %6.2f')%nme,xy=(X,0.75),xycoords='axes fraction')
-# 			a.annotate(('RMSE: %6.2f')%rmse,xy=(X,0.7),xycoords='axes fraction')
-# 			a.annotate(('R: %6.2f')%r[0],xy=(X,0.65),xycoords='axes fraction')
-# 			amon.annotate('EXP: '+exp,xy=(X,0.95),xycoords='axes fraction')
-# 			amon.annotate(('MFB: %6.2f')%mfbmon,xy=(X,0.9),xycoords='axes fraction')
-# 			amon.annotate(('MFE: %6.2f')%mfemon,xy=(X,0.85),xycoords='axes fraction')
-# 			amon.annotate(('NMB: %6.2f')%nmbmon,xy=(X,0.8),xycoords='axes fraction')
-# 			amon.annotate(('NME: %6.2f')%nmemon,xy=(X,0.75),xycoords='axes fraction')
-# 			amon.annotate(('RMSE: %6.2f')%rmsemon,xy=(X,0.7),xycoords='axes fraction')
-# 			amon.annotate(('R: %6.2f')%rmon[0],xy=(X,0.65),xycoords='axes fraction')
-# 		a.set_title(i)
-# 		f.savefig(output_pdf_path+'/IMPROVE/siteplots/timeseries-IMPROVE'+i+'.pdf',dpi=400)
-# 		f.savefig(output_png_path+'/IMPROVE/siteplots/timeseries-IMPROVE'+i+'.png',dpi=400)
-# 		f.savefig(output_jpg_path+'/IMPROVE/siteplots/timeseries-IMPROVE'+i+'.jpg',dpi=400)
-# 		fmon.savefig(output_pdf_path+'/IMPROVE/siteplots/monthly-IMPROVE'+i+'.pdf',dpi=400)
-# 		fmon.savefig(output_png_path+'/IMPROVE/siteplots/monthly-IMPROVE'+i+'.png',dpi=400)
-# 		fmon.savefig(output_jpg_path+'/IMPROVE/siteplots/monthly-IMPROVE'+i+'.jpg',dpi=400)	
-# 		print 
-# 		kk+=1
-# 	for i in range(15):
-# 		print np.count_nonzero(~np.isnan(meanmodelmon['obs'][i,:]))
-# 		print (meanmodelmon['obs'][i,:])
-# 		print '----',meanmodelmon['obs'][i,:]
-# 		print '----',np.count_nonzero(~np.isnan(meanmodelmon['obs'][i,:]))
-# 	#raw_input()
-# 	fmean,amean=plt.subplots(ncols=4,figsize=(12,4))
-# 	colors=['red', 'green','blue','black']
-# 	shadingcolors=['#ff000033', '#00ff0033','#0000ff33','#55555533']
-# 	for n,exp in enumerate(EXPS,0):	
-# 		std=np.nanstd(meanmodelmon[exp],axis=0)
-# 		maxi=np.nanmax(meanmodelmon[exp],axis=0)
-# 		mini=np.nanmin(meanmodelmon[exp],axis=0)
-# 		#amean.fill_between(np.linspace(0,12,12), mini, maxi, facecolor=shadingcolors[n], alpha=0.3,interpolate=True)
-# 		#amean.plot(np.linspace(0,12,12), mini, color=shadingcolors[n])
-# 		#amean.plot(np.linspace(0,12,12), maxi, color=shadingcolors[n])
-# 		amean[n].plot(np.linspace(1,12,12), np.nanmean(meanmodelmon[exp],axis=0)+std, color=shadingcolors[n])
-# 		amean[n].plot(np.linspace(1,12,12), np.nanmean(meanmodelmon[exp],axis=0)-std, color=shadingcolors[n])
-# 		amean[n].plot(np.linspace(1,12,12),np.nanmean(meanmodelmon[exp],axis=0),color=colors[n])
-# 		amean[n].set_ylim([0,2.0])
-# 		amean[n].set_title(exp)
-# 		nmbmean=NMB(np.nanmean(meanmodelmon['obs'],axis=0),np.nanmean(meanmodelmon[exp],axis=0))
-# 		rmean=pearsonr(np.nanmean(meanmodelmon[exp],axis=0),np.nanmean(meanmodelmon['obs'],axis=0))
-# 		amean[n].annotate(('NMB: %6.2f')%nmbmean,xy=(X,0.8),xycoords='axes fraction')
-# 		amean[n].annotate(('R: %6.2f,%6.2e')%(rmean[0],rmean[1]),xy=(X,0.75),xycoords='axes fraction')
-# 		#ax.fill_between(x, y1, y2, where=y2 <= y1, facecolor='red', interpolate=True)
-# 		print np.nanmean(meanmodelmon[exp],axis=0)
-# 	std=np.nanstd(meanmodelmon['obs'],axis=0)
-# 	maxi=np.nanmax(meanmodelmon['obs'],axis=0)
-# 	mini=np.nanmin(meanmodelmon['obs'],axis=0)
-# 	#amean.fill_between(np.linspace(0,12,12), mini, maxi,facecolor=shadingcolors[3], alpha=0.3,interpolate=True)
-# 	#amean.plot(np.linspace(0,12,12), mini,color=shadingcolors[3])
-# 	#amean.plot(np.linspace(0,12,12), maxi,color=shadingcolors[3])
-# 	amean[3].plot(np.linspace(1,12,12),np.nanmean(meanmodelmon['obs'],axis=0)+std,color=shadingcolors[3])
-# 	amean[3].plot(np.linspace(1,12,12),np.nanmean(meanmodelmon['obs'],axis=0)-std,color=shadingcolors[3])
-# 	amean[3].plot(np.linspace(1,12,12),np.nanmean(meanmodelmon['obs'],axis=0),color=colors[3])
-# 	amean[3].set_title('obs')
-# 	amean[3].set_ylim([0,2.0])
-# 	fmean.suptitle('IMPROVE')
-# 	#amean.set_yscale("log", nonposy='clip')
-# 	fmean.savefig(output_png_path+'/IMPROVE/siteplots/monthly-IMPROVE-allmean.png',dpi=400)
-
-# 	fmean,amean=plt.subplots(ncols=3,figsize=(12,4))
-# 	colors=['red', 'blue','black']
-# 	shadingcolors=['#ff000033', '#00ff0033','#0000ff33','#55555533']
-# 	for n,exp in enumerate(EXPS[:],0):	
-# 		if n==0:
-# 			amean[n].set_title('NEWSOA')
-# 		elif n==1:
-# 			amean[n].set_title('OLDSOA')
-# 		std=np.nanstd(meanmodelmon[exp],axis=0)
-# 		maxi=np.nanmax(meanmodelmon[exp],axis=0)
-# 		mini=np.nanmin(meanmodelmon[exp],axis=0)
-# 		#amean.fill_between(np.linspace(0,12,12), mini, maxi, facecolor=shadingcolors[n], alpha=0.3,interpolate=True)
-# 		#amean.plot(np.linspace(0,12,12), mini, color=shadingcolors[n])
-# 		#amean.plot(np.linspace(0,12,12), maxi, color=shadingcolors[n])
-# 		amean[n].plot(np.linspace(1,12,12), np.nanmean(meanmodelmon[exp],axis=0)+std, color=shadingcolors[n])
-# 		amean[n].plot(np.linspace(1,12,12), np.nanmean(meanmodelmon[exp],axis=0)-std, color=shadingcolors[n])
-# 		amean[n].plot(np.linspace(1,12,12),np.nanmean(meanmodelmon[exp],axis=0),color=colors[n])
-# 		amean[n].set_xticks([1,2,3,4,5,6,7,8,9,10,11,12])
-# 		amean[n].set_ylim([0,2.0])
-# 		#amean[n].set_title(exp)
-# 		nmbmean=NMB(np.nanmean(meanmodelmon['obs'],axis=0),np.nanmean(meanmodelmon[exp],axis=0))
-# 		rmean=pearsonr(np.nanmean(meanmodelmon[exp],axis=0),np.nanmean(meanmodelmon['obs'],axis=0))
-# 		amean[n].annotate(('NMB: %6.2f')%nmbmean,xy=(0.2,0.8),xycoords='axes fraction',fontsize=16)
-# 		amean[n].annotate(('R: %6.2f,%6.2e')%(rmean[0],rmean[1]),xy=(0.2,0.7),xycoords='axes fraction',fontsize=16)
-# 		#ax.fill_between(x, y1, y2, where=y2 <= y1, facecolor='red', interpolate=True)
-# 		print np.nanmean(meanmodelmon[exp],axis=0)
-# 	std=np.nanstd(meanmodelmon['obs'],axis=0)
-# 	maxi=np.nanmax(meanmodelmon['obs'],axis=0)
-# 	mini=np.nanmin(meanmodelmon['obs'],axis=0)
-# 	#amean.fill_between(np.linspace(0,12,12), mini, maxi,facecolor=shadingcolors[3], alpha=0.3,interpolate=True)
-# 	#amean.plot(np.linspace(0,12,12), mini,color=shadingcolors[3])
-# 	#amean.plot(np.linspace(0,12,12), maxi,color=shadingcolors[3])
-# 	amean[2].plot(np.linspace(1,12,12),np.nanmean(meanmodelmon['obs'],axis=0)+std,color=shadingcolors[2])
-# 	amean[2].plot(np.linspace(1,12,12),np.nanmean(meanmodelmon['obs'],axis=0)-std,color=shadingcolors[2])
-# 	amean[2].plot(np.linspace(1,12,12),np.nanmean(meanmodelmon['obs'],axis=0),color=colors[2])
-# 	amean[2].set_xticks([1,2,3,4,5,6,7,8,9,10,11,12])
-
-# 	amean[2].set_title('Observations')
-# 	amean[2].set_ylim([0,2.0])
-# 	fmean.suptitle('IMPROVE')
-# 	#amean.set_yscale("log", nonposy='clip')
-# 	fmean.savefig(output_png_path+'/IMPROVE/monthly-IMPROVE-SOAmean.png',dpi=400)
-	
-# 	#raw_input()
-# 	fmean,amean=plt.subplots(ncols=2,figsize=(12,4))
-# 	colors=['red', 'blue','black']
-# 	shadingcolors=['#ff000033', '#00ff0033','#0000ff33','#55555533']
-# 	amean[0].errorbar(np.linspace(1,12,12),np.nanmean(meanmodelmon['obs'],axis=0), yerr=[std, std], fmt='o',color=shadingcolors[3],label='observations')
-# 	#amean[0].plot(np.linspace(1,12,12),np.nanmean(meanmodelmon['obs'],axis=0)+std,color=shadingcolors[2])
-# 	#amean[0].plot(np.linspace(1,12,12),np.nanmean(meanmodelmon['obs'],axis=0)-std,color=shadingcolors[2])
-# 	#amean[0].plot(np.linspace(1,12,12),np.nanmean(meanmodelmon['obs'],axis=0),color=colors[2])
-# 	amean[0].set_xticks([1,2,3,4,5,6,7,8,9,10,11,12])
-
-# 	#amean[0].set_title('Observations')
-# 	amean[0].set_ylim([0,2.0])
-# 	amean[1].errorbar(np.linspace(1,12,12),np.nanmean(meanmodelmon['obs'],axis=0), yerr=[std, std], fmt='o',color=shadingcolors[3],label='observations')
-# 	#plot(np.linspace(1,12,12),np.nanmean(meanmodelmon['obs'],axis=0)+std,'',color=shadingcolors[2])
-# 	#amean[1].plot(np.linspace(1,12,12),np.nanmean(meanmodelmon['obs'],axis=0)-std,color=shadingcolors[2])
-# 	#amean[1].plot(np.linspace(1,12,12),np.nanmean(meanmodelmon['obs'],axis=0),color=colors[2])
-# 	amean[1].set_xticks([1,2,3,4,5,6,7,8,9,10,11,12])
-
-# 	#amean[1].set_title('Observations')
-# 	amean[1].set_ylim([0,2.0])
-# 	for n,exp in enumerate(EXPS[:],0):	
-# 		if n==0:
-# 			amean[n].set_title('NEWSOA')
-# 			labeli='NEWSOA'
-# 		elif n==1:
-# 			amean[n].set_title('OLDSOA')
-# 			labeli='OLDSOA'
-# 		std=np.nanstd(meanmodelmon[exp],axis=0)
-# 		maxi=np.nanmax(meanmodelmon[exp],axis=0)
-# 		mini=np.nanmin(meanmodelmon[exp],axis=0)
-# 		#amean.fill_between(np.linspace(0,12,12), mini, maxi, facecolor=shadingcolors[n], alpha=0.3,interpolate=True)
-# 		#amean.plot(np.linspace(0,12,12), mini, color=shadingcolors[n])
-# 		#amean.plot(np.linspace(0,12,12), maxi, color=shadingcolors[n])
-# 		amean[n].plot(np.linspace(1,12,12), np.nanmean(meanmodelmon[exp],axis=0)+std, color=shadingcolors[n])
-# 		amean[n].plot(np.linspace(1,12,12), np.nanmean(meanmodelmon[exp],axis=0)-std, color=shadingcolors[n])
-# 		amean[n].plot(np.linspace(1,12,12),np.nanmean(meanmodelmon[exp],axis=0),color=colors[n],label=labeli)
-# 		amean[n].set_xticks([1,2,3,4,5,6,7,8,9,10,11,12])
-# 		if n==0:
-# 			amean[n].set_ylim([0,0.5])
-# 		else:
-# 			amean[n].set_ylim([0,2.0])
-# 		#amean[n].set_title(exp)
-# 		nmbmean=NMB(np.nanmean(meanmodelmon['obs'],axis=0),np.nanmean(meanmodelmon[exp],axis=0))
-# 		rmean=pearsonr(np.nanmean(meanmodelmon[exp],axis=0),np.nanmean(meanmodelmon['obs'],axis=0))
-# 		amean[n].annotate(('NMB: %6.2f')%nmbmean,xy=(0.2,0.8),xycoords='axes fraction',fontsize=16)
-# 		amean[n].annotate(('R: %6.2f,%6.2e')%(rmean[0],rmean[1]),xy=(0.2,0.7),xycoords='axes fraction',fontsize=16)
-# 		#ax.fill_between(x, y1, y2, where=y2 <= y1, facecolor='red', interpolate=True)
-# 		print np.nanmean(meanmodelmon[exp],axis=0)
-# 	std=np.nanstd(meanmodelmon['obs'],axis=0)
-# 	maxi=np.nanmax(meanmodelmon['obs'],axis=0)
-# 	mini=np.nanmin(meanmodelmon['obs'],axis=0)
-# 	#amean.fill_between(np.linspace(0,12,12), mini, maxi,facecolor=shadingcolors[3], alpha=0.3,interpolate=True)
-# 	#amean.plot(np.linspace(0,12,12), mini,color=shadingcolors[3])
-# 	#amean.plot(np.linspace(0,12,12), maxi,color=shadingcolors[3])
-# 	fmean.suptitle('IMPROVE')
-# 	#amean.set_yscale("log", nonposy='clip')
-# 	fmean.savefig(output_png_path+'/IMPROVE/monthly-IMPROVE-SOAmean_2panels.png',dpi=400)
-
-
-
-
-# 	f2,ax2=plt.subplots(ncols=3,figsize=(12,4))
-# 	f2b,ax2b=plt.subplots(ncols=2,figsize=(10,4))
-# 	fb,axb=plt.subplots(ncols=3,figsize=(12,4))
-
-# 	k=-1
-# 	yearmean_model={}
-# 	yearmean_model_pom={}
-# 	for exp in EXPS:
-# 		k+=1
-# 		yearmean_obs=[]
-# 		#all_model=np.array()
-# 		#all_obs=np.array()
-# 		print exp
-# 		f,ax=plt.subplots(1)
-# 		#temp=None
-# 		for i in sitedata:
-# 			#print i
-# 			model=nc.Dataset(col_path+exp+'_'+i+'.nc','r').variables[i][:]
-# 			model_pom=nc.Dataset(col_path+exp+'_pom_'+i+'.nc','r').variables[i][:]
-# 			#model=model_site[i]['OM']		
-# 			##### trying to get yearly means in dict
-# 			if exp not in yearmean_model.keys():
-# 				yearmean_model[exp]=[]
-# 				yearmean_model[exp].append(np.mean(model))
-# 				yearmean_model_pom[exp]=[]
-# 				yearmean_model_pom[exp].append(np.mean(model))
-# 			else:
-# 				yearmean_model[exp].append(np.mean(model))
-# 				yearmean_model_pom[exp].append(np.mean(model))
-			
-# 			####
-# 			#yearmean_model[exp].append(np.mean(model))
-# 			yearmean_obs.append(np.mean(sitedata[i][6][1][:,1]))
-# 			print type(model)
-# 			if not 'temp_mod' in locals():
-# 				temp_mod=model.copy()
-# 			else:			
-# 				temp_mod=np.concatenate((all_model,model))
-# 				print np.shape(temp_mod)
-# 			all_model=temp_mod.copy()
-# 			if not 'temp_obs' in locals():
-# 				temp_obs=sitedata[i][6][1][:,1].copy()
-# 			else:			
-# 				temp_obs=np.concatenate((all_obs,sitedata[i][6][1][:,1]))
-# 				print np.shape(temp_obs)
-# 			all_obs=temp_obs.copy()
-# 			#print type(sitedata[i][6][1][:,1])
-# 			#all_obs+=list(sitedata[i][6][1][:,1])
-# 			ax.loglog(sitedata[i][6][1][:,1],model,'or',ms=2)
-# 			axb[k].loglog(sitedata[i][6][1][:,1],model,'or',ms=2)
-# 			xmax=max(max(model),max(sitedata[i][6][1][:,1]))
-# 			xmin=min(min(model),min(sitedata[i][6][1][:,1]))
-
-# 			ymax=xmax
-# 			ymin=xmin
-# 			ax.set_xlabel('IMPROVE OM[pm25 1.8*C][ug m-3]')
-# 			ax.set_ylabel('TM5:'+exp+' OM[pm25][ug m-3]')
-# 			ax.set_ylabel('TM5 OM[pm25][ug m-3]')
-# 			ax.set_title(sitedata[i][0])
-# 			ax.set_title(exp+': all sites')
-# 			axb[k].set_xlabel('IMPROVE OM[pm25 1.8*C][ug m-3]')
-# 			axb[k].set_ylabel('TM5:'+exp+' OM[pm25][ug m-3]')
-# 			axb[k].set_ylabel('TM5 OM[pm25][ug m-3]')
-# 			axb[k].set_title(sitedata[i][0])
-# 			axb[k].set_title(exp+': all sites')
-# 		#plt.show()
-# 		ax.plot([0.0001,1000],[0.0001,1000])
-# 		ax.plot([0.0001,1000],[0.001,10000],'g--')
-# 		ax.plot([0.001,10000],[0.0001,1000],'g--')
-# 		ax.set_ylim([.9e-4,2e1])
-# 		ax.set_xlim([.9e-4,2e1])
-# 		axb[k].plot([0.0001,1000],[0.0001,1000])
-# 		axb[k].plot([0.0001,1000],[0.001,10000],'g--')
-# 		axb[k].plot([0.001,10000],[0.0001,1000],'g--')
-# 		axb[k].set_ylim([.9e-4,2e1])
-# 		axb[k].set_xlim([.9e-4,2e1])
-# 				#raw_input()
-# 		print 'N '+exp+':',len(yearmean_model[exp]),len(yearmean_obs)
-# 		if len(yearmean_model[exp])>1 and len(yearmean_obs)>1 and False:
-
-# 			f,ax=plt.subplots(1)
-# 			print yearmean_model.keys,len(yearmean_model[exp]),len(yearmean_obs)
-# 			ax.loglog(yearmean_obs,yearmean_model[exp],'ob')
-# 			ax2[k].loglog(yearmean_obs,yearmean_model[exp],'or',ms=2)
-# 			if k<2:
-# 				ax2b[k].loglog(yearmean_obs,yearmean_model[exp],'or',ms=2)
-# 			xmax=max(max(yearmean_model[exp]),max(yearmean_obs))
-# 			xmin=min(min(yearmean_model[exp]),min(yearmean_obs))
-# 			mfb=MFB(yearmean_obs,yearmean_model[exp])
-# 			mfe=MFE(yearmean_obs,yearmean_model[exp])
-# 			nmb=NMB(yearmean_obs,yearmean_model[exp])
-# 			nme=NME(yearmean_obs,yearmean_model[exp])
-# 			rmse=RMSE(yearmean_obs,yearmean_model[exp])
-# 			r=pearsonr(yearmean_obs,yearmean_model[exp])
-# 			r_all=pearsonr(all_obs,all_model)
-# 			mfb_all=MFB(all_obs,all_model)
-# 			mfe_all=MFE(all_obs,all_model)
-# 			nmb_all=NMB(all_obs,all_model)
-# 			nme_all=NME(all_obs,all_model)
-# 			rmse_all=RMSE(all_obs,all_model)
-# 			ymax=xmax
-# 			ymin=xmin
-# 			#ax.plot([xmin,xmax],[ymin,ymax])
-# 			#ax.plot([xmin,xmax],[10*ymin,10*ymax],'g--')
-# 			#ax.plot([xmin,xmax],[0.1*ymin,0.10*ymax],'g--')
-# 			#ax.set_ylim([0.9*ymin,1.1*ymax])
-# 			#ax.set_xlim([0.9*xmin,1.1*xmax])
-# 			ax.set_ylim([5E-3,5e0])
-# 			ax.set_xlim([5E-3,5e0])
-# 			ax.set_xlabel('IMPROVE OM[pm25 1.8*C][ug m-3]')
-# 			ax.set_ylabel('TM5:'+exp+' OM[pm25][ug m-3]')
-# 			ax.set_ylabel('TM5 OM[pm25][ug m-3]')
-# 			ax2[k].set_ylim([5E-3,5e0])
-# 			ax2[k].set_xlim([5E-3,5e0])
-# 			ax2[k].set_xlabel('IMPROVE OM[pm25 1.8*C][ug m-3]')
-# 			ax2[k].set_ylabel('TM5:'+exp+' OM[pm25][ug m-3]')
-# 			ax2[k].set_title('Run: '+exp)
-# 			#if exp=='soa-riccobono':
-# 			if exp=='newsoa-ri':
-# 				ax2[k].set_title('NEWSOA')
-# 			elif exp=='oldsoa-final':
-# 				ax2[k].set_title('OLDSOA')
-# 			else:
-# 				ax2[k].set_title('NOSOA')
-# 			if k<2:
-# 				ax2b[k].set_ylim([5E-3,5e0])
-# 				ax2b[k].set_xlim([5E-3,5e0])
-# 				ax2b[k].set_xlabel('IMPROVE OM[pm25 1.8*C][ug m-3]')
-# 				ax2b[k].set_ylabel('TM5 OM[pm25][ug m-3]')
-# 				ax2b[k].set_title('Run: '+exp)
-# 				#if exp=='soa-riccobono':
-# 				if exp=='newsoa-ri':
-# 					ax2b[k].set_title('NEWSOA')
-	
-# 				elif exp=='oldsoa-final':
-# 					ax2b[k].set_title('OLDSOA')
-# 			#print yearmean_obs
-# 			print exp,'rmse: ',rmse,rmse_all
-# 			print exp,'mfb: ',mfb,mfb_all
-# 			print exp,'mfe: ',mfe,mfe_all
-# 			print exp,'nmb: ',nmb,nmb_all
-# 			print exp,'nme: ',nme,nme_all
-# 			ax.plot([0.001,1000],[0.001,1000])
-# 			ax.plot([0.001,1000],[0.01,10000],'g--')
-# 			ax.plot([0.01,10000],[0.001,1000],'g--')
-# 			ax2[k].plot([0.001,1000],[0.001,1000])
-# 			ax2[k].plot([0.001,1000],[0.01,10000],'g--')
-# 			ax2[k].plot([0.01,10000],[0.001,1000],'g--')
-# 			ax2[k].annotate(('MFB: %6.2f')%mfb,xy=(0.05,0.9),xycoords='axes fraction')
-# 			ax2[k].annotate(('MFE: %6.2f')%mfe,xy=(0.05,0.85),xycoords='axes fraction')
-# 			ax2[k].annotate(('NMB: %6.2f')%nmb,xy=(0.05,0.8),xycoords='axes fraction')
-# 			ax2[k].annotate(('NME: %6.2f')%nme,xy=(0.05,0.75),xycoords='axes fraction')
-# 			ax2[k].annotate(('RMSE: %6.2f')%rmse,xy=(0.05,0.7),xycoords='axes fraction')
-# 			ax2[k].annotate(('R: %6.2f')%r[0],xy=(0.05,0.65),xycoords='axes fraction')
-# 			axb[k].annotate(('MFB: %6.2f')%mfb_all,xy=(0.05,0.95),xycoords='axes fraction')
-# 			axb[k].annotate(('MFE: %6.2f')%mfe_all,xy=(0.05,0.9),xycoords='axes fraction')
-# 			axb[k].annotate(('NMB: %6.2f')%nmb_all,xy=(0.05,0.85),xycoords='axes fraction')
-# 			axb[k].annotate(('NME: %6.2f')%nme_all,xy=(0.05,0.8),xycoords='axes fraction')
-# 			axb[k].annotate(('RMSE: %6.2f')%rmse_all,xy=(0.05,0.75),xycoords='axes fraction')
-# 			axb[k].annotate(('R: %6.2f')%r_all[0],xy=(0.05,0.7),xycoords='axes fraction')
-			
-# 			if k<2:
-# 				ax2b[k].plot([0.001,1000],[0.001,1000])
-# 				ax2b[k].plot([0.001,1000],[0.01,10000],'g--')
-# 				ax2b[k].plot([0.01,10000],[0.001,1000],'g--')
-# 				ax2b[k].annotate(('MFB: %6.2f')%mfb,xy=(0.05,0.9),xycoords='axes fraction')
-# 				ax2b[k].annotate(('MFE: %6.2f')%mfe,xy=(0.05,0.85),xycoords='axes fraction')
-# 				ax2b[k].annotate(('NMB: %6.2f')%nmb,xy=(0.05,0.8),xycoords='axes fraction')
-# 				ax2b[k].annotate(('NME: %6.2f')%nme,xy=(0.05,0.75),xycoords='axes fraction')
-# 				ax2b[k].annotate(('RMSE: %6.2f')%rmse,xy=(0.05,0.7),xycoords='axes fraction')
-# 				ax2b[k].annotate(('R: %6.2f')%r[0],xy=(0.05,0.65),xycoords='axes fraction')
-# 		print 	
-# 	f2b.savefig(output_png_path+'scatter-IMPROVE-1x2.png',dpi=400)
-# 	f2b.savefig(output_jpg_path+'scatter-IMPROVE-1x2.jpg',dpi=400)
-# 	f2b.savefig(output_pdf_path+'scatter-IMPROVE-1x2.pdf',dpi=400)
-# 	f2.savefig(output_pdf_path+'scatter-IMPROVE-1x3.pdf',dpi=400)
-# 	f2.savefig(output_png_path+'scatter-IMPROVE-1x3.png',dpi=400)
-# 	f2.savefig(output_jpg_path+'scatter-IMPROVE-1x3.jpg',dpi=400)
-# 	fb.savefig(output_pdf_path+'scatter-all-IMPROVE-1x3.pdf',dpi=400)
-# 	fb.savefig(output_png_path+'scatter-all-IMPROVE-1x3.png',dpi=400)
-# 	fb.savefig(output_jpg_path+'scatter-all-IMPROVE-1x3.jpg',dpi=400)
-# 	#plt.show()	
-
-# 	fmean,amean=plt.subplots(ncols=2,nrows=2,figsize=(12,8))
-# 	colors=['red', 'blue','black']
-# 	shadingcolors=['#ff000033', '#0000ff33','#00ff0033','#55555533']
-# 	#amean[0,0].plot(np.linspace(1,12,12),np.nanmean(meanmodelmon['obs'],axis=0)+std,color=shadingcolors[2])
-# 	#amean[0,0].plot(np.linspace(1,12,12),np.nanmean(meanmodelmon['obs'],axis=0)-std,color=shadingcolors[2])
-# 	#amean[0,0].plot(np.linspace(1,12,12),np.nanmean(meanmodelmon['obs'],axis=0),color=colors[2])
-# 	amean[0,0].errorbar(np.linspace(1,12,12),np.nanmean(meanmodelmon['obs'],axis=0), yerr=[std, std], fmt='--o',color=shadingcolors[3],label='observations')
-# 	amean[0,0].set_xticks([1,2,3,4,5,6,7,8,9,10,11,12])
-# 	amean[0,0].set_ylim([0,2.0])
-
-# 	amean[0,1].errorbar(np.linspace(1,12,12),np.nanmean(meanmodelmon['obs'],axis=0), yerr=[std, std], fmt='--o',color=shadingcolors[3],label='observations')
-# 		#amean[2].set_title('Observations')
-# 	amean[0,1].set_xticks([1,2,3,4,5,6,7,8,9,10,11,12])
-# 	amean[0,1].set_ylim([0,2.0])
-	
-# 	for n,exp in enumerate(EXPS[:],0):	
-# 		if n==0:
-# 			amean[0,n].set_title('NEWSOA')
-# 			colori='r'
-# 		elif n==1:
-# 			amean[0,n].set_title('OLDSOA')
-# 			colori='b'
-# 		print n, exp
-# 		std=np.nanstd(meanmodelmon[exp],axis=0)
-# 		maxi=np.nanmax(meanmodelmon[exp],axis=0)
-# 		mini=np.nanmin(meanmodelmon[exp],axis=0)
-# 		#amean.fill_between(np.linspace(0,12,12), mini, maxi, facecolor=shadingcolors[n], alpha=0.3,interpolate=True)
-# 		#amean.plot(np.linspace(0,12,12), mini, color=shadingcolors[n])
-# 		#amean.plot(np.linspace(0,12,12), maxi, color=shadingcolors[n])
-# 		amean[0,n].plot(np.linspace(1,12,12), np.nanmean(meanmodelmon[exp],axis=0)+std, color=shadingcolors[n])
-# 		amean[0,n].plot(np.linspace(1,12,12), np.nanmean(meanmodelmon[exp],axis=0)-std, color=shadingcolors[n])
-# 		amean[0,n].plot(np.linspace(1,12,12),np.nanmean(meanmodelmon[exp],axis=0),color=colors[n],label=labeli)
-# 		amean[0,n].plot(np.linspace(1,12,12),np.nanmean(meanmodelmon_pom[exp],axis=0),color=colors[n],ls='--',label=labeli)
-# 		amean[0,n].set_xticks([1,2,3,4,5,6,7,8,9,10,11,12])
-# 		if n==0:
-# 			amean[0,n].set_ylim([0,1.0])
-# 		else:
-# 			amean[0,n].set_ylim([0,2.0])
-# 		#amean[n].set_title(exp)
-# 		nmbmean=NMB(np.nanmean(meanmodelmon['obs'],axis=0),np.nanmean(meanmodelmon[exp],axis=0))
-# 		rmean=pearsonr(np.nanmean(meanmodelmon[exp],axis=0),np.nanmean(meanmodelmon['obs'],axis=0))
-# 		amean[0,n].annotate(('NMB: %6.2f')%nmbmean,xy=(0.2,0.8),xycoords='axes fraction',fontsize=16)
-# 		amean[0,n].annotate(('R: %6.2f,%6.2e')%(rmean[0],rmean[1]),xy=(0.2,0.7),xycoords='axes fraction',fontsize=16)
-# 		amean[0,n].set_xlabel('Month')
-# 		#amean[0,n].set_ylabel('TM5:'+exp+' OM[pm25][ug m-3]')
-# 		amean[0,n].set_ylabel('OM[pm25][ug m-3]')
-# 		#ax.fill_between(x, y1, y2, where=y2 <= y1, facecolor='red', interpolate=True)
-# 		print np.nanmean(meanmodelmon[exp],axis=0)
-# 		print 'teststste',n,exp
-# 		amean[1,n].loglog(yearmean_obs,yearmean_model[exp],'o',c=colori,ms=3)
-# 		amean[1,n].plot([0.0001,1000],[0.0001,1000],'k')
-# 		amean[1,n].plot([0.0001,1000],[0.001,10000],'k--')
-# 		amean[1,n].plot([0.001,10000],[0.0001,1000],'k--')
-# 		amean[1,n].set_ylim([.5e-2,3e0])
-# 		amean[1,n].set_xlim([.5e-2,3e0])
-# 		amean[1,n].set_xlabel('IMPROVE OM[pm25][ug m-3]')
-# 		#amean[0,n].set_ylabel('TM5:'+exp+' OM[pm25][ug m-3]')
-# 		amean[1,n].set_ylabel('TM5 OM[pm25][ug m-3]')
-# 		amean[1,n].set_aspect('equal')			
-
-# 	std=np.nanstd(meanmodelmon['obs'],axis=0)
-# 	maxi=np.nanmax(meanmodelmon['obs'],axis=0)
-# 	mini=np.nanmin(meanmodelmon['obs'],axis=0)
-# 	#amean.fill_between(np.linspace(0,12,12), mini, maxi,facecolor=shadingcolors[3], alpha=0.3,interpolate=True)
-# 	#amean.plot(np.linspace(0,12,12), mini,color=shadingcolors[3])
-# 	#amean.plot(np.linspace(0,12,12), maxi,color=shadingcolors[3])
-# 	fmean.suptitle('IMPROVE')
-# 	#amean.set_yscale("log", nonposy='clip')
-# 	fmean.savefig(output_png_path+'/IMPROVE/scatter-seasonal-IMPROVE-2x2.png',dpi=400)
-# 	fmean.savefig(output_pdf_path+'/IMPROVE/scatter-seasonal-IMPROVE-2x2.pdf')
-# 	fmean.savefig(output_jpg_path+'/IMPROVE/scatter-seasonal-IMPROVE-2x2.jpg',dpi=400)
-# 	plt.show()
-
-
-	
-# if __name__=='__main__':
-# 	main()
-# plt.figure(figsize=(10,2))
-# gs = gridspec.GridSpec(1, 2, width_ratios=[4, 1],)
-# ax0 = plt.subplot(gs[0, 0])
-# ax1 = plt.subplot(gs[0, 1])
-# #plt.plot(sitedata[i][6][0],sitedata[i][6][1][:,0])
-# ax0.plot(sitedata[i][6][0],sitedata[i][6][1][:,1])
-# #print len(sitedata[i][6][0]),len(model)
-# ax0.plot(sitedata[i][6][0],model)
-# print dt_axis
-# ax0.plot(dt_ax2,gpdata*1e9)
-# ax1.loglog(sitedata[i][6][1][:,1],model,'o')
-# ax0.set_title((i+' Bias: %6.2f, Error: %6.2f')%(MFBm,MFEm))
-# #plt.plot(sitedata['AREN1'][6][0],sitedata['AREN1'][6][1][:,0])
-# #plt.plot(sitedata['AREN1'][6][0],sitedata['AREN1'][6][1][:,1])
-# xmax=1.1*max([max(model),max(obs)])
-# xmin=0.9*min([min(model),min(obs)])
-
-# ymax=xmax
-# ymin=xmin
-# #plt.plot([xmin,xmax],[ymin,ymax])
-# #plt.plot([xmin,xmax],[10*ymin,10*ymax],'--')
-# #plt.plot([xmin,xmax],[0.1*ymin,0.10*ymax],'--')
-# ax1.set_ylim([0.9*ymin,1.1*ymax])
-# ax1.set_xlim([0.9*xmin,1.1*xmax])
-
-# if NN>20:
-# 	plt.show()
-# 	NN=0
 
