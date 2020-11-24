@@ -232,7 +232,7 @@ def main():
 		obsmean=np.nanmean(meanmodelmon['obs'])
 		expmean=np.nanmean(meanmodelmon[exp])
 
-		tablex.write(" %6s , %6.2f, %6.2f, %6.0f\\%% , %6.2f\n"%(labeli, obsmean, expmean, rmean[0],nmbmean*100))
+		tablex.write(" %6s , %6.2f, %6.2f, %6.0f\\%% , %6.2f\n"%(labeli, obsmean, expmean,nmbmean*100, rmean[0]))
 		tabletex.write("& %6s & %6.2f & %6.2f& %6.0f\\%% & %6.2f\\\\\n"%(labeli, obsmean, expmean,nmbmean*100, rmean[0]))
 		#\\unit{\\mu gm^{-3}}
 		print exp,n,obsmean,expmean
