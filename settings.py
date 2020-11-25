@@ -26,6 +26,6 @@ EXPS=['newsoa-ri','oldsoa-bhn']
 EXP_NAMEs=['NEWSOA','OLDSOA']
 aeronet_path='/Users/bergmant/Documents/obs-data/aeronet/'
 path_improve_col=basepathprocessed+'/improve_col2/'
-
+raw_store='/Volumes/Utrecht/'
 #paper=basepath+'paper/'
 
