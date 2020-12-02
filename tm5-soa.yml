@@ -1,0 +1,25 @@
+# tm5-soa evaluation paper environment definitions
+# conda develop /Users/bergmant/Documents/python/tm5/
+# conda develop /Users/bergmant/Documents/python/aeronet/
+name: soa-work
+channels:
+- conda-forge
+- defaults
+dependencies:
+- python=2.7
+- numpy
+- xarray
+- netcdf4
+- scipy
+- matplotlib
+- pandas
+- nappy
+- cis
+- basemap
+- cdo
+- proj4=5.2.0
+- python-cdo
+- ipykernel
+- jupyter
+- nb_conda
+- cdms2
