@@ -7,7 +7,7 @@ import netCDF4 as nc
 import re
 import pandas as pd
 from mpl_toolkits.basemap import Basemap
-from general_toolbox import get_gridboxarea,lonlat,write_netcdf_file
+from general_toolbox import get_gridboxarea,lonlat,write_netcdf_file,parse_nas_normalcomments,NMB
 import os
 from scipy.stats import pearsonr
 import numpy as np
@@ -87,19 +87,19 @@ def monthly_aggregation(sitedata,dataname='CN'):
 
 	return meanmodelmon
 
-def read_num(filein="/Users/bergmant/Documents/tm5-soa/output/raw/newsoa-ri/general_TM5_newsoa-ri_2010.lev1.nc"):
+def read_num(filein):
 	fhandle=nc.Dataset(filein,'r')
 	output={}
 	for imode in ['N_NUS','N_AIS','N_ACS','N_COS','N_AII','N_ACI','N_COI']:
 		output[imode]=fhandle[imode][:]
 	return output
-def read_rwet(filein="/Users/bergmant/Documents/tm5-soa/output/raw/newsoa-ri/general_TM5_newsoa-ri_2010.lev1.nc"):
+def read_rwet(filein):
 	fhandle=nc.Dataset(filein,'r')
 	output={}
 	for imode in ['RWET_NUS','RWET_AIS','RWET_ACS','RWET_COS','RWET_AII','RWET_ACI','RWET_COI']:
 		output[imode]=fhandle[imode][:]
 	return output
-def read_timeaxis(filein="/Users/bergmant/Documents/tm5-soa/output/raw/newsoa-ri/general_TM5_newsoa-ri_2010.lev1.nc"):
+def read_timeaxis(filein):
 	fhandle=nc.Dataset(filein,'r')
 	return fhandle.variables['time'][:]
 def colocate_time(gpdata,timeaxis,stime,etime,obsdata,errorvalue=999999):
@@ -166,7 +166,7 @@ def cnRead(filein='/Users/bergmant/Documents/obs-data/Ebas_200120_1014_CN/*.nas'
 		# Get the Normal Comments (SCOM) lines.
 		norm_comms = reader.getNormalComments()
 		# parse header stuff
-		lon,lat,stationname,site,elev,sdate,matrix,unit=emep_read.parse_nas_normalcomments(norm_comms)
+		lon,lat,stationname,site,elev,sdate,matrix,unit=parse_nas_normalcomments(norm_comms)
 		# save for site
 		sitedict['name']=stationname
 		sitedict['lat']=lat
@@ -259,110 +259,92 @@ def modal_frac(rad,rwet,mode):
 	#print z, rad,rdata,cmedr2mmedr
 	modfrac=1-(0.5+0.5*erf(z*hr2))
 	return modfrac
-observed_data=cnRead()
-list_stations(observed_data)
-cutoffs=get_cutoffs()
-EXPS=['newsoa-ri','oldsoa-bhn']
-modeldata={}
-data_monthly={}
-for experiment in EXPS:
-	model={}
-	#test2,timeax=read_N(basepathraw+exp+'/general_TM5_'+exp+'_2010.lev1.nc')
-	Number_modes,radii_modes,timeax=read_N_R(basepathraw+experiment+'/general_TM5_'+experiment+'_2010.lev1.nc')
-	for isite in observed_data:
-		# if cutoff is not defined use 10um
-		if np.isnan(cutoffs[isite][1]):
-			sitecutoff=10
-		else: # otherwise use the value
-			sitecutoff=cutoffs[isite][1]*1e9/2
-		sitecutoff=5
-		#each site at a time
-		CN_site_data=np.zeros_like(timeax)
-		for N_mode in Number_modes:
-			gridpoint_Nmode_data,lat,lon=emep_read.select_gp(Number_modes[N_mode],observed_data[isite]['lat'],observed_data[isite]['lon'])
-			radius_mode_varname='RWET_'+N_mode[-3:]
-			gridpoint_R_data,lat,lon=emep_read.select_gp(radii_modes[radius_mode_varname],observed_data[isite]['lat'],observed_data[isite]['lon'])
-			modal_fraction= modal_frac(sitecutoff,gridpoint_R_data,radius_mode_varname[-3:])
-			CN_site_data[:]+=gridpoint_Nmode_data*modal_fraction
-			
-		#m1m,m1s,t1=colocate_time(gpdata,timeax,observed_data[isite]['starttime'],observed_data[isite]['endtime'],observed_data[isite]['CN'])
-		CN,std,col_time=colocate_time(CN_site_data,timeax,observed_data[isite]['starttime'],observed_data[isite]['endtime'],observed_data[isite]['CN'])
-		modeldata_site={'CN':CN,'std':std,'time':col_time,'lon':lon,'lat':lat}
-		model[isite]=modeldata_site
-	modeldata[experiment]=model
+def read_collocate_modeldata(observed_data):
+	cutoffs=get_cutoffs()
+
+	modeldata={}
+	data_monthly={}
+	for experiment in EXPS:
+		model={}
+		#test2,timeax=read_N(basepathraw+exp+'/general_TM5_'+exp+'_2010.lev1.nc')
+		Number_modes,radii_modes,timeax=read_N_R(basepathraw+experiment+'/general_TM5_'+experiment+'_2010.lev1.nc')
+		for isite in observed_data:
+			# if cutoff is not defined use 5um (diameter of 10um)
+			if np.isnan(cutoffs[isite][1]):
+				sitecutoff=5
+			else: # otherwise use the value
+				sitecutoff=cutoffs[isite][1]*1e9/2
+			sitecutoff=5
+			#each site at a time
+			CN_site_data=np.zeros_like(timeax)
+			for N_mode in Number_modes:
+				gridpoint_Nmode_data,lat,lon=emep_read.select_gp(Number_modes[N_mode],observed_data[isite]['lat'],observed_data[isite]['lon'])
+				radius_mode_varname='RWET_'+N_mode[-3:]
+				gridpoint_R_data,lat,lon=emep_read.select_gp(radii_modes[radius_mode_varname],observed_data[isite]['lat'],observed_data[isite]['lon'])
+				modal_fraction= modal_frac(sitecutoff,gridpoint_R_data,radius_mode_varname[-3:])
+				CN_site_data[:]+=gridpoint_Nmode_data*modal_fraction
+				
+			#m1m,m1s,t1=colocate_time(gpdata,timeax,observed_data[isite]['starttime'],observed_data[isite]['endtime'],observed_data[isite]['CN'])
+			CN,std,col_time=colocate_time(CN_site_data,timeax,observed_data[isite]['starttime'],observed_data[isite]['endtime'],observed_data[isite]['CN'])
+			modeldata_site={'CN':CN,'std':std,'time':col_time,'lon':lon,'lat':lat}
+			model[isite]=modeldata_site
+		modeldata[experiment]=model
 
 
-	data_monthly[experiment]=monthly_aggregation(modeldata[experiment])
-data_monthly['obs']=monthly_aggregation(observed_data)
+		data_monthly[experiment]=monthly_aggregation(modeldata[experiment])
+	data_monthly['obs']=monthly_aggregation(observed_data)
+	return modeldata
+def	annual_aggregate(modeldata,observed_data):
+	annual_data={}
+	for i in EXPS:
+		annual_data[i]=np.zeros(len(observed_data))
+	annual_data['obs']=np.zeros(len(observed_data))
 
-md1=[]
-md2=[]#np.array(len(modeldata['newsoa-ri'].keys()))
-mo1=[]
-for site in modeldata['newsoa-ri']:
-	md1.append(np.nanmedian(modeldata['newsoa-ri'][site]['CN']))
-	md2.append(np.nanmedian(modeldata['oldsoa-bhn'][site]['CN']))
-	mo1.append(np.nanmedian(observed_data[site]['CN']))
-	#print ~np.isnan(observed_data[site]['CN'])
-	# drop nans for correlation calculation
-	obs=[x for x in observed_data[site]['CN'] if ~np.isnan(x)]
-	mod1=[x for x in modeldata['newsoa-ri'][site]['CN'] if ~np.isnan(x)]
-	mod2=[x for x in modeldata['oldsoa-bhn'][site]['CN'] if ~np.isnan(x)]
-	R1=pearsonr(obs,mod1)
-	R2=pearsonr(obs,mod2)
-	NMB1=emep_read.NMB(obs,mod1)
-	NMB2=emep_read.NMB(obs,mod2)
-	pdobs=pd.Series(obs)
-	pdmod1=pd.Series(mod1)
-	pdmod2=pd.Series(mod2)
-	print site,' series NEWSOA',pdobs.corr(pdmod1, method='pearson')
-	print site,' series OLDSOA',pdobs.corr(pdmod2, method='pearson')
-	
-md1=np.array(md1)
-md2=np.array(md2)
-mo1=np.array(mo1)
-d1=[]
-d2=[]#np.array(len(modeldata['newsoa-ri'].keys()))
-o1=[]
-decrease_count=0
-increase_count=0
-for site in modeldata['newsoa-ri']:
-	d1site=np.nanmean(modeldata['newsoa-ri'][site]['CN'])
-	d2site=np.nanmean(modeldata['oldsoa-bhn'][site]['CN'])
-	d1.append(d1site)
-	d2.append(d2site)
-	o1.append(np.nanmean(observed_data[site]['CN']))
-	if d1site-d2site<0:
-		decrease_count+=1
-	else:
-		increase_count+=1
+	for exp in EXPS:
+		for i,site in enumerate(modeldata['newsoa-ri']):
+			annual_data[exp][i]=np.nanmean(modeldata[exp][site]['CN'])
+	for i,site in enumerate(observed_data):
+		annual_data['obs'][i]=np.nanmean(observed_data[site]['CN'])
+	return annual_data
+def scatter_plot_fig8(annual_data):
+	R1= pearsonr(annual_data['obs'],annual_data['newsoa-ri'])
+	R2= pearsonr(annual_data['obs'],annual_data['oldsoa-bhn'])
 
-d1=np.array(d1)
-d2=np.array(d2)
-o1=np.array(o1)
+	f_sc,ax_sc=plt.subplots(1,figsize=(6,6))
+	ax_sc.plot(annual_data['obs'],annual_data['newsoa-ri'],'or')
+	ax_sc.loglog(annual_data['obs'],annual_data['oldsoa-bhn'],'xb')
+	ax_sc.annotate(('NEWSOA: %6.2f')%R1[0],xy=(.01,0.9),xycoords='axes fraction')
+	ax_sc.annotate(('OLDSOA: %6.2f')%R2[0],xy=(.01,0.85),xycoords='axes fraction')
+	ax_sc.plot([0,10000],[0,10000],'-k')
+	ax_sc.plot([0,5000],[0,10000],'--g')
+	ax_sc.plot([0,10000],[0,5000],'--g')
+	ax_sc.set_xlabel('Observed number concentration [cm-3]')
+	ax_sc.set_ylabel('Modelled number concentration [cm-3]')
+	ax_sc.set_xlim(5e1,1e4)
+	ax_sc.set_ylim(5e1,1e4)
+	ax_sc.set_aspect('equal', 'box')
+	f_sc.savefig(output_png_path+'NCONC/fig8_scatter_CN.png',dpi=pngdpi)
+def main():
+	observed_data=cnRead()
+	list_stations(observed_data)
 
-R1= pearsonr(o1,d1)
-R2= pearsonr(o1,d2)
 
-f_sc,ax_sc=plt.subplots(1,figsize=(6,6))
-ax_sc.plot(o1,d1,'or')
-ax_sc.loglog(o1,d2,'xb')
-ax_sc.annotate(('NEWSOA: %6.2f')%R1[0],xy=(.01,0.9),xycoords='axes fraction')
-ax_sc.annotate(('OLDSOA: %6.2f')%R2[0],xy=(.01,0.85),xycoords='axes fraction')
-ax_sc.plot([0,10000],[0,10000],'-k')
-ax_sc.plot([0,5000],[0,10000],'--g')
-ax_sc.plot([0,10000],[0,5000],'--g')
-ax_sc.set_xlabel('Observed number concentration [cm-3]')
-ax_sc.set_ylabel('Modelled number concentration [cm-3]')
-ax_sc.set_xlim(5e1,1e4)
-ax_sc.set_ylim(5e1,1e4)
-ax_sc.set_aspect('equal', 'box')
-NMB1=emep_read.NMB(o1,d1)
-NMB2=emep_read.NMB(o1,d2)
-print 'NEWSOA:',NMB1*100,R1
-print 'OLDSOA:',NMB2*100,R2
-print 'decrease at N stations:',decrease_count
-print 'increase at N stations:',increase_count
+	modeldata=read_collocate_modeldata(observed_data)
+	annual_data=annual_aggregate(modeldata,observed_data)
 
-f_sc.savefig(output_png_path+'NCONC/fig8_scatter_CN.png',dpi=400)
+	increase_count = np.count_nonzero((annual_data['newsoa-ri']>annual_data['oldsoa-bhn']))
+	decrease_count = np.count_nonzero((annual_data['newsoa-ri']<annual_data['oldsoa-bhn']))
 
-plt.show()
+	scatter_plot_fig8(annual_data)
+	NMB1=NMB(annual_data['obs'],annual_data['newsoa-ri'])
+	NMB2=NMB(annual_data['obs'],annual_data['oldsoa-bhn'])
+	R1= pearsonr(annual_data['obs'],annual_data['newsoa-ri'])
+	R2= pearsonr(annual_data['obs'],annual_data['oldsoa-bhn'])
+	print 'NEWSOA:',NMB1*100,R1
+	print 'OLDSOA:',NMB2*100,R2
+	print 'decrease at N stations:',decrease_count
+	print 'increase at N stations:',increase_count
+	plt.show()
+
+if __name__ == '__main__':
+	main()
