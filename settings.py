@@ -13,9 +13,12 @@ global EXP_NAMEs
 
 pngdpi=600
 basepath='/Users/bergmant/Documents/tm5-soa/'
-output_png_path=basepath+'figures/draft-v0.9/png/'
-output_pdf_path=basepath+'figures/draft-v0.9/pdf/'
-output_jpg_path=basepath+'figures/draft-v0.9/jpg/'
+# output_png_path=basepath+'figures/draft-v0.9/png/'
+# output_pdf_path=basepath+'figures/draft-v0.9/pdf/'
+# output_jpg_path=basepath+'figures/draft-v0.9/jpg/'
+output_png_path=basepath+'figures/submission/'
+output_pdf_path=basepath+'figures/submission/'
+output_jpg_path=basepath+'figures/submission/'
 rawoutput=basepath+'output/raw/'
 basepathraw=rawoutput
 output=basepath+'output/'
@@ -29,3 +32,5 @@ path_improve_col=basepathprocessed+'/improve_col2/'
 raw_store='/Volumes/Utrecht/'
 #paper=basepath+'paper/'
 
+# for added output
+debug=False
