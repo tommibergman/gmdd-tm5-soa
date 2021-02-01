@@ -327,16 +327,16 @@ def plot_both(data,bounds=[-0.375,-0.3,-0.225,-0.15,-0.075,-0.025,0.025,0.075,0.
 		c.ax.tick_params(labelsize=10)
 		#c.set_label('AOD relative bias [(TM5-AERONET)/AERONET]')
 		name=name+'-'+data[i]['name']
-		c.set_label('AOD bias ['+data[i]['name']+']',fontsize=18)
+		c.set_label('AOD difference ['+data[i]['name']+']',fontsize=18)
 		axit[i].annotate(string.ascii_lowercase[i]+')',xy=(0.1+float(i)*0.45,0.85),xycoords='figure fraction',fontsize=18)
-	fcolumn.savefig(output_pdf_path+'fig13_bias'+name+'-satellite_2010.pdf')
-	fcolumn.savefig(output_png_path+'fig13_bias'+name+'-satellite_2010.png',dpi=600)
+	#fcolumn.savefig(output_pdf_path+'fig13_bias'+name+'-satellite_2010.pdf')
+	#fcolumn.savefig(output_png_path+'fig13_bias'+name+'-satellite_2010.png',dpi=600)
 	return fcolumn,axit
 def main(all=False):
 	modisdata,modismodeldata,modislon,modislat=read_modis()
 	AATSRdata,aatsrmodeldata,aatsrlon,aatsrlat=read_aatsr()
 	f,a=plot_both([{"satdata":modismodeldata['oldsoa-bhn'],"modeldata":modismodeldata['newsoa-ri'],"lon":modislon,"lat":modislat,'name':'NEWSOA-OLDSOA'},{"satdata":aatsrmodeldata['oldsoa-bhn'],"modeldata":aatsrmodeldata['newsoa-ri'],"lon":aatsrlon,"lat":aatsrlat,'name':'NEWSOA-OLDSOA'}],[-0.0375,-0.03,-0.0225,-0.015,-0.0075,-0.0025,0.0025,0.0075,0.015,0.0225,0.030,0.0375])
-	#f.savefig(output_png_path+'article/fig13xx_bias-NEWSOA-OLDSOA-2satellites_2010.png',dpi=600)
+	f.savefig(output_png_path+'article/fig13_bias-MODIS-AATSR-satellite_2010.png',dpi=600)
 	if all:
 		plot_aatsr_diff(AATSRdata,aatsrmodeldata,aatsrlon,aatsrlat)
 		plot_modis_diff(modisdata,modismodeldata,modislon,modislat)
