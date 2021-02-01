@@ -181,6 +181,10 @@ def cnRead(filein='/Users/bergmant/Documents/obs-data/Ebas_200120_1014_CN/*.nas'
 		reader.readData()
 		floats = [np.float(e) for e in reader["V"][1]]
 		pltdata=np.array(floats)
+		# if np.any(pltdata>10000):
+		# 	for i in pltdata:
+		# 		print i
+		# 		print stationname,pltdata[i],np.count_nonzero(pltdata>10000)
 		pltdata[pltdata>10000]=np.nan
 		sitedict['CN']=pltdata
 		#print reader["V"][0]
@@ -274,7 +278,7 @@ def read_collocate_modeldata(observed_data):
 				sitecutoff=5
 			else: # otherwise use the value
 				sitecutoff=cutoffs[isite][1]*1e9/2
-			sitecutoff=5
+			sitecutoff=5 #radius -> Dp=10nm
 			#each site at a time
 			CN_site_data=np.zeros_like(timeax)
 			for N_mode in Number_modes:
@@ -323,10 +327,10 @@ def scatter_plot_fig8(annual_data):
 	ax_sc.set_xlim(5e1,1e4)
 	ax_sc.set_ylim(5e1,1e4)
 	ax_sc.set_aspect('equal', 'box')
-	f_sc.savefig(output_png_path+'NCONC/fig8_scatter_CN.png',dpi=pngdpi)
+	f_sc.savefig(output_png_path+'article/fig8_scatter_CN.png',dpi=pngdpi)
 def main():
 	observed_data=cnRead()
-	list_stations(observed_data)
+	#list_stations(observed_data)
 
 
 	modeldata=read_collocate_modeldata(observed_data)
