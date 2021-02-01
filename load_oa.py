@@ -176,11 +176,18 @@ cb.set_label('Change in OA mass on the surface (NEWSOA-OLDSOA)/OLDSOA[%]]')
 #ax3[1].set_title('Fractional change in annual mean organic aerosol concentration at the surface \n (NEWSOA-OLDSOA)/OLDSOA [%]',fontsize=18)
 ax3[0].annotate('a)',xy=(0.05,0.95),xycoords='axes fraction',fontsize=18)
 ax3[1].annotate('b)',xy=(0.05,0.95),xycoords='axes fraction',fontsize=18)
-f3.savefig(output_png_path+'/ORGANICMASS/fig12_annual_2-panel-frac-load-conc-map_total_oa_NEWSOA-OLDSOA.png',dpi=600)
+f3.savefig(output_png_path+'/article/fig12_annual_2-panel-frac-load-conc-map_total_oa_NEWSOA-OLDSOA.png',dpi=600)
 
 
 f3,ax3=seasonal_plot(load,EXPS[0],EXPS[1],True,[-3,-2,-1,-0.75,-0.5,-0.25,-0.1,0.1,0.25,0.5,0.75,1,2,3],EXP_NAMEs[0],EXP_NAMEs[1])
-f3.savefig(output_png_path+'/ORGANICMASS/figS8_seasonal_map_frac_load_total_oa_NEWSOA-OLDSOA.png',dpi=600)
+f3.savefig(output_png_path+'/supplement/figS7_seasonal_map_frac_load_total_oa_NEWSOA-OLDSOA.png',dpi=600)
+
+f3,ax3=plt.subplots(1)
+annual_diff_plot(loadsoa,EXPS[0],EXPS[1],True,[-2,-1.5,-1,-0.5,-0.25,-0.1,0.1,0.25,0.5,1,1.5,2],ax3,'Burden of SOA ')
+#ax3.set_title('Annual mean fractional change in burden of SOA.')
+f3.savefig(output_png_path+'/article/fig5_annual_map_frac_load_soa_NEWSOA-OLDSOA.png',dpi=600)
+
+
 
 optional_plots=False
 if optional_plots:
@@ -224,10 +231,10 @@ if optional_plots:
 	f3.savefig(output_png_path+'/ORGANICMASS/seasonal_map_frac_load_soa_NEWSOA-OLDSOA.png',dpi=600)
 
 
-	# f3,ax3=plt.subplots(1)
-	# annual_diff_plot(loadsoa,EXPS[0],EXPS[1],True,[-2,-1.5,-1,-0.5,-0.25,-0.1,0.1,0.25,0.5,1,1.5,2],ax3,'Burden of SOA ')
-	# #ax3.set_title('Annual mean fractional change in burden of SOA.')
-	# f3.savefig(output_png_path+'/ORGANICMASS/annual_map_frac_load_soa_NEWSOA-OLDSOA.png',dpi=600)
+	f3,ax3=plt.subplots(1)
+	annual_diff_plot(loadsoa,EXPS[0],EXPS[1],True,[-2,-1.5,-1,-0.5,-0.25,-0.1,0.1,0.25,0.5,1,1.5,2],ax3,'Burden of SOA ')
+	#ax3.set_title('Annual mean fractional change in burden of SOA.')
+	f3.savefig(output_png_path+'/ORGANICMASS/annual_map_frac_load_soa_NEWSOA-OLDSOA.png',dpi=600)
 
 	# f3,ax3=plt.subplots(1)
 	# annual_diff_plot(loadsoa,EXPS[0],EXPS[1],False,[-13,-11,-9,-7,-5,-3,-1,-0.1,0.1,1,3,5,7,9,11,13],ax3,'Burden of SOA ')
