@@ -163,6 +163,8 @@ def main():
 	tablex.write("Name, R, NMB\n")
 	tabletex=open(paperpath+'stats_improve.tex','w')
 	tabletex.write("%Name & Obs&Model& R &NMB (\%)\n")
+	table_layout2_tex=open(paperpath+'stats_improve.tex','w')
+	table_layout2_tex.write("%Name & Obs&Model& R &NMB (\%)\n")
 	for i in sitedata:
 		#sitedata		
 		obs=sitedata[i][6][1][:,1]
@@ -234,6 +236,7 @@ def main():
 
 		tablex.write(" %6s , %6.2f, %6.2f, %6.0f\\%% , %6.2f\n"%(labeli, obsmean, expmean,nmbmean*100, rmean[0]))
 		tabletex.write("& %6s & %6.2f & %6.2f& %6.0f\\%% & %6.2f\\\\\n"%(labeli, obsmean, expmean,nmbmean*100, rmean[0]))
+		table_layout2_tex.write("& %6s & %6.2f & %6.2f& %6.0f\\%% & %6.2f\\\\\n"%(labeli, obsmean, expmean,nmbmean*100, rmean[0]))
 		#\\unit{\\mu gm^{-3}}
 		print exp,n,obsmean,expmean
 	std=np.nanstd(meanmodelmon['obs'],axis=0)
@@ -398,9 +401,9 @@ def main():
 	maxi=np.nanmax(meanmodelmon['obs'],axis=0)
 	mini=np.nanmin(meanmodelmon['obs'],axis=0)
 	fmean.suptitle('IMPROVE')
-	fmean.savefig(output_png_path+'/IMPROVE/scatter-seasonal-IMPROVE-2x2.png',dpi=400)
-	fmean.savefig(output_pdf_path+'/IMPROVE/scatter-seasonal-IMPROVE-2x2.pdf')
-	fmean.savefig(output_jpg_path+'/IMPROVE/scatter-seasonal-IMPROVE-2x2.jpg',dpi=400)
+	fmean.savefig(output_png_path+'/article/fig10_scatter-seasonal-IMPROVE-2x2.png',dpi=400)
+	fmean.savefig(output_pdf_path+'/article/fig10_scatter-seasonal-IMPROVE-2x2.pdf')
+	fmean.savefig(output_jpg_path+'/article/fig10_scatter-seasonal-IMPROVE-2x2.jpg',dpi=400)
 	plt.show()
 
 
