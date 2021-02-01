@@ -5,17 +5,12 @@ from mpl_toolkits.basemap import Basemap
 import matplotlib as mpl
 import sys
 from colocate_aeronet import do_colocate
-from general_toolbox import lonlat,get_gb_xr
+from general_toolbox import lonlat,get_gb_xr,monthlengths
 from pylab import *
 import xarray as xr
 from settings import *
 filein='../output/general_TM5_soa-riccobono_2010.mm.nc'
-def monthlengths(time):
-	days=np.array([31,28,31,30,31,30,31,31,30,31,30,31])
-	#print time
-	monlenghts = xr.DataArray(days, coords=[time], dims=['time'])
-	#print monlenghts
-	return monlenghts
+
 def calc_budget(ds):
 	'''
 	Calculate the budget from general output of tm5_tools
@@ -31,7 +26,7 @@ def calc_budget(ds):
 	if ds.dims['time']!=12:
 		exit('Time dimension is not 12 months!! Exiting!')
 	bud={}
-	monlengths=monthlengths(ds['time'])
+	monlengths=monthlengths(2010,ds['time'])
 	dsgb=get_gb_xr()
 	if 'lon' not in ds:
 		dsgb.rename({'lon':'longitude','lat':'latitude'},inplace=True)
@@ -157,10 +152,76 @@ def read_biomass_burning_nmvoc():
 	isop=ds['C5H8'].isel(time=[1920,1921,1922,1923,1924,1925,1926,1927,1928,1929,1920,1931])
 	ds=xr.open_dataset(basepath+'/input/gridcellarea-em-biomassburning_input4MIPs_emissions_CMIP_VUA-CMIP-BB4CMIP6-1-2_gn.nc')
 	gb=ds['gridcellarea']
-	terp=(terp*gb*monthlengths(terp['time'])).sum().values*3600*24*1e-9
-	isop=(isop*gb*monthlengths(isop['time'])).sum().values*3600*24*1e-9
+
+	terp=(terp*gb*monthlengths(2010,terp['time'])).sum().values*3600*24*1e-9
+	isop=(isop*gb*monthlengths(2010,isop['time'])).sum().values*3600*24*1e-9
 	return terp,isop
+def land_burden():
+	ds=xr.open_dataset(basepath+'/input/landfraction_3x2.nc')
+	dsgb=get_gb_xr()
+	if 'lon' not in ds:
+		dsgb.rename({'lon':'longitude','lat':'latitude'},inplace=True)
+	#for exp in EXPS:
+	exp='newsoa-ri'
+	ds2=xr.open_dataset(output+'/general_TM5_'+exp+'_2010.mm.nc')
+	f,ax=plt.subplots(1)
+	landburdenmap=ds['LANDFRACTION']*(ds2['loadsoa']).mean(dim='time')
+
+	# lon,lat=lonlat('TM53x2')
+	# lons, lats = np.meshgrid(lon,lat)
+	# #print lon
+	# m=Basemap(projection='robin',lon_0=0,ax=ax)
+	# bounds_load=[0.0001,0.01,0.05,0.1,0.25,0.5,1,2,3]
+	# norm = mpl.colors.BoundaryNorm(bounds_load, len(bounds_load)-1)
+	# mycmap=plt.get_cmap('RdBu_r',len(bounds_load)-1) 
+	# image=m.pcolormesh(lons,lats,np.squeeze(landburdenmap)*1e6,norm=norm,cmap=mycmap,latlon=True)
+	# m.drawparallels(np.arange(-90.,90.,30.))
+	# m.drawmeridians(np.arange(-180.,180.,60.))
+	# m.drawcoastlines()
+	# cb = m.colorbar(image,"bottom", ticks=bounds_load,size="5%", pad="2%")
+	# #ax.set_title('Fractional change in annual mean organic aerosol concentration at the surface \n (NEWSOA-OLDSOA)/OLDSOA',fontsize=18)
+	# f,ax=plt.subplots(1)
+	# #landburdenmap2=lsm.roll
+	# oceanburdenmap=(ds['LANDFRACTION']-1)*-1*(ds2['loadsoa']).mean(dim='time')
+	# lon,lat=lonlat('TM53x2')
+	# lons, lats = np.meshgrid(lon,lat)
+	# m=Basemap(projection='robin',lon_0=0,ax=ax)
+	# bounds_load=[0.0001,0.01,0.05,0.1,0.25,0.5,1,2,3]
+	# norm = mpl.colors.BoundaryNorm(bounds_load, len(bounds_load)-1)
+	# mycmap=plt.get_cmap('RdBu_r',len(bounds_load)-1)
+	# image=m.pcolormesh(lons,lats,np.squeeze(landburdenmap)*1e6,norm=norm,cmap=mycmap,latlon=True)
+	# m.drawparallels(np.arange(-90.,90.,30.))
+	# m.drawmeridians(np.arange(-180.,180.,60.))
+	# m.drawcoastlines()
+	# cb = m.colorbar(image,"bottom", ticks=bounds_load,size="5%", pad="2%")
+	# #ax.set_title('Fractional change in annual mean organic aerosol concentration at the surface \n (NEWSOA-OLDSOA)/OLDSOA',fontsize=18)
+
+	# f,ax=plt.subplots(1)
+	# landburdenmap=(ds2['loadsoa']).mean(dim='time')
+	# lon,lat=lonlat('TM53x2')
+	# lons, lats = np.meshgrid(lon,lat)
+	# m=Basemap(projection='robin',lon_0=0,ax=ax)
+	# bounds_load=[0.0001,0.01,0.05,0.1,0.25,0.5,1,2,3]
+	# norm = mpl.colors.BoundaryNorm(bounds_load, len(bounds_load)-1)
+	# mycmap=plt.get_cmap('RdBu_r',len(bounds_load)-1)
+	# image=m.pcolormesh(lons,lats,np.squeeze(oceanburdenmap)*1e6,norm=norm,cmap=mycmap,latlon=True)
+	# m.drawparallels(np.arange(-90.,90.,30.))
+	# m.drawmeridians(np.arange(-180.,180.,60.))
+	# m.drawcoastlines()
+	# cb = m.colorbar(image,"bottom", ticks=bounds_load,size="5%", pad="2%")
+	# #ax.set_title('Fractional change in annual mean organic aerosol concentration at the surface \n (NEWSOA-OLDSOA)/OLDSOA',fontsize=18)
+	# plt.show()
+	#print np.shape(landburden)
+	landburden=((ds2['loadsoa']+ds2['loadoa'])*dsgb['area']*ds['LANDFRACTION']).mean(dim='time')
+	oceanburden=((ds2['loadsoa']+ds2['loadoa'])*dsgb['area']*(ds['LANDFRACTION']-1.0)*-1.0).mean(dim='time')
+	#print np.shape(landburden)
+	print landburden.sum()*1e-9
+	print oceanburden.sum()*1e-9
+	#(ds[i+j]*dsgb['area']).mean(dim='time').sum().values/1e9
+	return landburden,landburdenmap
 if __name__ == "__main__": 
+	a,b=land_burden()
+
 	#read_biomass_burning_nmvoc()
 	filedict={}
 	for name,exp in zip(EXP_NAMEs,EXPS):
