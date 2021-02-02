@@ -8,11 +8,9 @@ from mpl_toolkits.basemap import Basemap
 from pylab import *
 import os
 import sys
-sys.path.append('/Users/bergmant/Documents/python')
 from lonlat import lonlat
 from settings import *
 from lonlat import lonlat
-from aerocom_sites import aerocom_sites
 import Colocate_MODIS as MODIS
 import string
 from settings import *
