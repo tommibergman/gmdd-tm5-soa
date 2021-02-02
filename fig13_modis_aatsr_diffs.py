@@ -118,7 +118,7 @@ def plot_aatsr_diff(AATSRdata,modeldata,AATSRlon,AATSRlat):
 	#c.set_label('AOD relative bias [(TM5-AERONET)/AERONET]')
 	fAATSR.savefig(output_pdf_path+'aatsr/AATSR_2010.pdf')
 	fAATSR.savefig(output_png_path+'aatsr/AATSR_2010.png',dpi=600)
-def read_modis():
+def read_modis(landsea_print=False):
 	
 	cellarea_file=output+'/ec-ei-an0tr6-sfc-glb100x100-0000-oro.nc'
 	cellarea=nc.Dataset(cellarea_file,'r').variables['cell_area'][:]
@@ -143,20 +143,21 @@ def read_modis():
 		#model2=output+'/col_MOD04_MYD04_QA2_L2_TM5_'+EXPs[1]+'_2010_1x1_yearmean.nc'
 		modeldata[expi]=np.squeeze(nc.Dataset(model,'r').variables['od550aer'][:].transpose())
 		#modeldata2=np.squeeze(nc.Dataset(model2,'r').variables['od550aer'][:].transpose())
-		print(np.mean(modisdata),np.nanmean(modisdata))
-		print(np.mean(modeldata[expi]),np.nanmean(modeldata[expi]))
-		print ('cellareamean')
-		print(np.mean(modisdata),np.nansum(modisdata*cellarea)/np.sum(cellarea))
-		print(np.mean(modeldata[expi]),np.nansum(modeldata[expi]*cellarea)/(np.sum(cellarea)))
-		#print(np.mean(modeldata2),np.nansum(modeldata2*cellarea)/(np.sum(cellarea)))
-		print ('land')
-		print(np.mean(modisdata),np.nansum(modisdata*cellarea*lsm)/np.nansum(cellarea*lsm))
-		print(np.mean(modeldata[expi]),np.nansum(modeldata[expi]*cellarea*lsm)/(np.nansum(cellarea*lsm)))
-		#print(np.mean(modeldata2),np.nansum(modeldata2*cellarea*lsm)/(np.nansum(cellarea*lsm)))
-		print ('ocean')
-		print(np.mean(modisdata),np.nansum(modisdata*cellarea*lsm2)/np.nansum(cellarea*lsm2))
-		print(np.mean(modeldata[expi]),np.nansum(modeldata[expi]*cellarea*lsm2)/(np.nansum(cellarea*lsm2)))
-		#print(np.mean(modeldata2),np.nansum(modeldata2*cellarea*lsm2)/(np.nansum(cellarea*lsm2)))
+		if landsea_print:
+			print(np.mean(modisdata),np.nanmean(modisdata))
+			print(np.mean(modeldata[expi]),np.nanmean(modeldata[expi]))
+			print ('cellareamean')
+			print(np.mean(modisdata),np.nansum(modisdata*cellarea)/np.sum(cellarea))
+			print(np.mean(modeldata[expi]),np.nansum(modeldata[expi]*cellarea)/(np.sum(cellarea)))
+			#print(np.mean(modeldata2),np.nansum(modeldata2*cellarea)/(np.sum(cellarea)))
+			print ('land')
+			print(np.mean(modisdata),np.nansum(modisdata*cellarea*lsm)/np.nansum(cellarea*lsm))
+			print(np.mean(modeldata[expi]),np.nansum(modeldata[expi]*cellarea*lsm)/(np.nansum(cellarea*lsm)))
+			#print(np.mean(modeldata2),np.nansum(modeldata2*cellarea*lsm)/(np.nansum(cellarea*lsm)))
+			print ('ocean')
+			print(np.mean(modisdata),np.nansum(modisdata*cellarea*lsm2)/np.nansum(cellarea*lsm2))
+			print(np.mean(modeldata[expi]),np.nansum(modeldata[expi]*cellarea*lsm2)/(np.nansum(cellarea*lsm2)))
+			#print(np.mean(modeldata2),np.nansum(modeldata2*cellarea*lsm2)/(np.nansum(cellarea*lsm2)))
 	return modisdata, modeldata,modislon,modislat
 def plot_modis_diff(modisdata,modeldata,modislon,modislat):
 	k=-1
