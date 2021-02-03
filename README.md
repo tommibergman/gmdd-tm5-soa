@@ -38,3 +38,14 @@ aeronet_analysis.py
 ## Fig15:
 aeronet_analysis.py
 
+## Fig S1:
+mass_budget.py
+
+## Fig S2-6:
+mass_budget.py
+
+## Fig S8-10:
+Col_SOA_MODIS.py
+
+## Fig S11-12:
+plot_aatsr.py
