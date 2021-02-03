@@ -85,64 +85,80 @@ def soa_budget(filedict):
 def print_budget(budget):
 	comp=['soa','oa','bc','so4','ss','dust','terp','isop','bbterp','bbisop']
 	for exp in budget:
-
-		print exp
+		fileout=open("budget_"+exp+"_table.txt","w")
+		#print exp
 		for i in comp:
+			fileout.write('\n')
 			for j in ['emi','wet','dry','load','prod']:
 				if j+i in budget[exp]:
 					if exp=='NEWSOA' and j+i=='emisoa':
 						continue
 					elif  exp=='OLDSOA' and j+i=='prodsoa':
 						continue
+					elif  exp=='OLDSOA' and (i=='terp' or i=='isop'):
+						continue
 					else:
-						print j+i,': ',budget[exp][j+i]
-					
+						#print j+i,': ',budget[exp][j+i]
+						fileout.write('%s: %5.2f \n'%(j+i,budget[exp][j+i]))
 			#print i,': \t',budget[exp]['load'+i]/(budget[exp]['wet'+i]+budget[exp]['dry'+i])*365
 			if exp=='NEWSOA':
 				if 'emi'+i in budget['NEWSOA'] and i !='so4' and i!='soa' and 'terp' not in i and 'isop' not in i:
 					#print budget[exp]['load'+i],budget[exp]['emi'+i]
-					print 'lifetime',i,': \t',budget[exp]['load'+i]/(budget[exp]['emi'+i])*365
+					#print 'lifetime',i,': \t',budget[exp]['load'+i]/(budget[exp]['emi'+i])*365
+					lifetime=budget[exp]['load'+i]/(budget[exp]['emi'+i])*365
+					fileout.write('lifetime %s: %5.2f \n'%(i,lifetime))
 				elif i=='soa':
-					print 'lifetime',i,': \t',budget[exp]['load'+i]/(budget[exp]['prod'+i])*365	
+					#print 'lifetime',i,': \t',budget[exp]['load'+i]/(budget[exp]['prod'+i])*365	
+					lifetime=budget[exp]['load'+i]/(budget[exp]['prod'+i])*365	
+					fileout.write('lifetime %s: %5.2f \n'%(i,lifetime))
 				elif  'terp' not in i and 'isop' not in i:
-					print 'lifetime',i,': \t',budget[exp]['load'+i]/(budget[exp]['emi'+i]+budget[exp]['prod'+i])*365
-					print budget[exp]['emi'+i],budget[exp]['prod'+i]
-					print 'so4 not emitted'	
+					lifetime=budget[exp]['load'+i]/(budget[exp]['emi'+i]+budget[exp]['prod'+i])*365
+					#print 'lifetime',i,': \t',budget[exp]['load'+i]/(budget[exp]['emi'+i]+budget[exp]['prod'+i])*365
+					fileout.write('lifetime %s: %5.2f \n'%(i,lifetime))
+					#print budget[exp]['emi'+i],budget[exp]['prod'+i]
+					fileout.write(' %s: %5.2f \n'%(budget[exp]['emi'+i],budget[exp]['prod'+i]))
+					#print 'so4 not emitted'	
 			else:
 				if exp=='OLDSOA' and 'emi'+i in budget['OLDSOA'] and i!='so4' and'terp' not in i and 'isop' not in i:
-					print 'lifetime',i,': \t',budget[exp]['load'+i]/(budget[exp]['emi'+i])*365
+					#print 'lifetime',i,': \t',budget[exp]['load'+i]/(budget[exp]['emi'+i])*365
+					lifetime=budget[exp]['load'+i]/(budget[exp]['emi'+i])*365
+					fileout.write('lifetime %s: %5.2f \n'%(i,lifetime))
 				elif 'terp' not in i and 'isop' not in i:
-					print 'lifetime',i,': \t',budget[exp]['load'+i]/(budget[exp]['emi'+i]+budget[exp]['prod'+i])*365
-					print budget[exp]['emi'+i],budget[exp]['prod'+i]
-					print 'so4 not emitted'	
+					lifetime=budget[exp]['load'+i]/(budget[exp]['emi'+i]+budget[exp]['prod'+i])*365
+					#print 'lifetime',i,': \t',budget[exp]['load'+i]/(budget[exp]['emi'+i]+budget[exp]['prod'+i])*365
+					fileout.write('lifetime %s: %5.2f \n'%(i,lifetime))
+					#print budget[exp]['emi'+i],budget[exp]['prod'+i]
+					#fileout.write(' %5.2f %5.2f \n'%(budget[exp]['emi'+i],budget[exp]['prod'+i]))
+					#print 'soa not emitted'	
+
 def soa_table(budget):
 	budget_table_latex=open(paper+"/budget_table.tex","w")
-	print 'making table for paper tm5 SOA'
-	text={'loadsoa':'Burden Tg','prodsoa':'Total SOA production Tg [y$^-1$]','prodelvoc':'contribution of ELVOC [Tg y$^-1$]','prodelvoc_IP':'from isoprene [Tg y$^-1$]','prodelvoc_MT':'from monoterpene [Tg y$^-1$]','prodsvoc':'contribution of SVOC [Tg y$^-1$]','prodsvoc_IP':'from isoprene [Tg y$^-1$]','prodsvoc_MT':'from monoterpene [Tg y$^-1$]','emisoa':'Emission [Tg y$^-1$]','wetsoa':'Wet Deposition [Tg y$^-1$]','drysoa':'Dry Deposition [Tg y$^-1$]','life':'Lifetime [days]'}
+	print 'making table for paper tm5 SOA\n'
+	text={'loadsoa':'Burden Tg                    ','prodsoa':'Total SOA production Tg [y$^-1$]','prodelvoc':'contribution of ELVOC [Tg y$^-1$]','prodelvoc_IP':'from isoprene [Tg y$^-1$]        ','prodelvoc_MT':'from monoterpene [Tg y$^-1$]     ','prodsvoc':'contribution of SVOC [Tg y$^-1$]','prodsvoc_IP':'from isoprene [Tg y$^-1$]        ','prodsvoc_MT':'from monoterpene [Tg y$^-1$]     ','emisoa':'Emission [Tg y$^-1$]            ','wetsoa':'Wet Deposition [Tg y$^-1$]      ','drysoa':'Dry Deposition [Tg y$^-1$]      ','life':'Lifetime [days]                 '}
 	for ii in ['loadsoa','prodsoa','prodelvoc','prodelvoc_IP','prodelvoc_MT','prodsvoc','prodsvoc_IP','prodsvoc_MT','emisoa','wetsoa','drysoa','life']:
-		print text[ii],'&',
-		budget_table_latex.write(text[ii]+'&')
+		print text[ii],'\t',
+		budget_table_latex.write(text[ii]+'\t')
 		for jj in sorted(budget.keys()):
 			if ii=='life':
 				if jj=='NEWSOA':
-					print (budget[jj]['loadsoa']/budget[jj]['prodsoa'])*365,'&',
-					budget_table_latex.write('%5.2f & '%((budget[jj]['loadsoa']/budget[jj]['prodsoa'])*365))
+					print '{:6.3f}\t'.format((budget[jj]['loadsoa']/budget[jj]['prodsoa'])*365),
+					budget_table_latex.write('%6.3f & '%((budget[jj]['loadsoa']/budget[jj]['prodsoa'])*365))
 				else:
-					print (budget[jj]['loadsoa']/budget[jj]['emisoa'])*365,'&',
-					budget_table_latex.write('%5.2f &'%((budget[jj]['loadsoa']/budget[jj]['emisoa'])*365))
+					print '{:6.3f}\t'.format((budget[jj]['loadsoa']/budget[jj]['emisoa'])*365),
+					budget_table_latex.write('%6.3f &'%((budget[jj]['loadsoa']/budget[jj]['emisoa'])*365))
 			else:
 				if jj=='OLDSOA' and 'prod' in ii:
 					budget_table_latex.write('-- ')
 					print '-- ',
 				elif jj=='NEWSOA' and 'emi' in ii:
 					budget_table_latex.write('-- &')
-					print '-- &',
+					print '-- ',
 				else:
-					budget_table_latex.write('%5.2f &'%(budget[jj][ii]))
-					print budget[jj][ii],'&',
+					budget_table_latex.write('%6.3f &'%(budget[jj][ii]))
+					print '{:6.3f}\t'.format(budget[jj][ii],'\t'),
 
 		budget_table_latex.write('\\\\\n')
-		print '\\\\'
+		print ' '
 	budget_table_latex.close()
 def read_biomass_burning_nmvoc():
 	# select time steps for 2010 from inputfiles for biomass burning emissions of MT and ISOP
@@ -166,52 +182,6 @@ def land_burden():
 	ds2=xr.open_dataset(output+'/general_TM5_'+exp+'_2010.mm.nc')
 	f,ax=plt.subplots(1)
 	landburdenmap=ds['LANDFRACTION']*(ds2['loadsoa']).mean(dim='time')
-
-	# lon,lat=lonlat('TM53x2')
-	# lons, lats = np.meshgrid(lon,lat)
-	# #print lon
-	# m=Basemap(projection='robin',lon_0=0,ax=ax)
-	# bounds_load=[0.0001,0.01,0.05,0.1,0.25,0.5,1,2,3]
-	# norm = mpl.colors.BoundaryNorm(bounds_load, len(bounds_load)-1)
-	# mycmap=plt.get_cmap('RdBu_r',len(bounds_load)-1) 
-	# image=m.pcolormesh(lons,lats,np.squeeze(landburdenmap)*1e6,norm=norm,cmap=mycmap,latlon=True)
-	# m.drawparallels(np.arange(-90.,90.,30.))
-	# m.drawmeridians(np.arange(-180.,180.,60.))
-	# m.drawcoastlines()
-	# cb = m.colorbar(image,"bottom", ticks=bounds_load,size="5%", pad="2%")
-	# #ax.set_title('Fractional change in annual mean organic aerosol concentration at the surface \n (NEWSOA-OLDSOA)/OLDSOA',fontsize=18)
-	# f,ax=plt.subplots(1)
-	# #landburdenmap2=lsm.roll
-	# oceanburdenmap=(ds['LANDFRACTION']-1)*-1*(ds2['loadsoa']).mean(dim='time')
-	# lon,lat=lonlat('TM53x2')
-	# lons, lats = np.meshgrid(lon,lat)
-	# m=Basemap(projection='robin',lon_0=0,ax=ax)
-	# bounds_load=[0.0001,0.01,0.05,0.1,0.25,0.5,1,2,3]
-	# norm = mpl.colors.BoundaryNorm(bounds_load, len(bounds_load)-1)
-	# mycmap=plt.get_cmap('RdBu_r',len(bounds_load)-1)
-	# image=m.pcolormesh(lons,lats,np.squeeze(landburdenmap)*1e6,norm=norm,cmap=mycmap,latlon=True)
-	# m.drawparallels(np.arange(-90.,90.,30.))
-	# m.drawmeridians(np.arange(-180.,180.,60.))
-	# m.drawcoastlines()
-	# cb = m.colorbar(image,"bottom", ticks=bounds_load,size="5%", pad="2%")
-	# #ax.set_title('Fractional change in annual mean organic aerosol concentration at the surface \n (NEWSOA-OLDSOA)/OLDSOA',fontsize=18)
-
-	# f,ax=plt.subplots(1)
-	# landburdenmap=(ds2['loadsoa']).mean(dim='time')
-	# lon,lat=lonlat('TM53x2')
-	# lons, lats = np.meshgrid(lon,lat)
-	# m=Basemap(projection='robin',lon_0=0,ax=ax)
-	# bounds_load=[0.0001,0.01,0.05,0.1,0.25,0.5,1,2,3]
-	# norm = mpl.colors.BoundaryNorm(bounds_load, len(bounds_load)-1)
-	# mycmap=plt.get_cmap('RdBu_r',len(bounds_load)-1)
-	# image=m.pcolormesh(lons,lats,np.squeeze(oceanburdenmap)*1e6,norm=norm,cmap=mycmap,latlon=True)
-	# m.drawparallels(np.arange(-90.,90.,30.))
-	# m.drawmeridians(np.arange(-180.,180.,60.))
-	# m.drawcoastlines()
-	# cb = m.colorbar(image,"bottom", ticks=bounds_load,size="5%", pad="2%")
-	# #ax.set_title('Fractional change in annual mean organic aerosol concentration at the surface \n (NEWSOA-OLDSOA)/OLDSOA',fontsize=18)
-	# plt.show()
-	#print np.shape(landburden)
 	landburden=((ds2['loadsoa']+ds2['loadoa'])*dsgb['area']*ds['LANDFRACTION']).mean(dim='time')
 	oceanburden=((ds2['loadsoa']+ds2['loadoa'])*dsgb['area']*(ds['LANDFRACTION']-1.0)*-1.0).mean(dim='time')
 	#print np.shape(landburden)
@@ -220,7 +190,7 @@ def land_burden():
 	#(ds[i+j]*dsgb['area']).mean(dim='time').sum().values/1e9
 	return landburden,landburdenmap
 if __name__ == "__main__": 
-	a,b=land_burden()
+	#a,b=land_burden()
 
 	#read_biomass_burning_nmvoc()
 	filedict={}
