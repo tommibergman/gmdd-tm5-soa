@@ -4,12 +4,8 @@ import netCDF4 as nc
 from mpl_toolkits.basemap import Basemap
 import matplotlib as mpl
 import sys
-#sys.path.append("/Users/bergmant/Documents//ifs+tm5-validation/scripts")
-#from colocate_aeronet import do_colocate
-#from lonlat import lonlat
 from pylab import *
 from settings import *
-#from production import production
 from general_toolbox import get_gridboxarea,lonlat
 import matplotlib.gridspec as gridspec
 import string
@@ -96,12 +92,11 @@ def prod_data(filein,species):
 	if (species=='soa' and 'prod_svoc'in ff.variables):
 		data.append(ff.variables['prod_svoc'][:])
 	if (species=='so4' and ('prod_liq_so4' in ff.variables)):
-		print 'liq'
+		#print 'liq'
 		data.append(ff.variables['prod_liq_'+species][:])
 	if (species=='so4' and 'prod_gas_so4'in ff.variables):
-		print 'gas'
+		#print 'gas'
 		data.append(ff.variables['prod_gas_'+species][:])
-	print 'prod',np.shape(data)
 	
 	return data
 def prod_data_source(filein,species):
@@ -111,28 +106,28 @@ def prod_data_source(filein,species):
 	ff=nc.Dataset(filein)
 	data={}
 	if (species=='soa' and 'p_el_ohterp'in ff.variables):
-		print np.sum(ff.variables['p_el_ohterp'][:])
+		#print np.sum(ff.variables['p_el_ohterp'][:])
 		data['el_ohterp']=np.array(ff.variables['p_el_ohterp'][:])
 	if (species=='soa' and 'p_el_o3terp'in ff.variables):
-		print np.sum(ff.variables['p_el_o3terp'][:])
+		#print np.sum(ff.variables['p_el_o3terp'][:])
 		data['el_o3terp']=np.array(ff.variables['p_el_o3terp'][:])
 	if (species=='soa' and 'p_el_ohisop'in ff.variables):
-		print np.sum(ff.variables['p_el_ohisop'][:])
+		#print np.sum(ff.variables['p_el_ohisop'][:])
 		data['el_ohisop']=np.array(ff.variables['p_el_ohisop'][:])
 	if (species=='soa' and 'p_el_o3isop'in ff.variables):
-		print np.sum(ff.variables['p_el_o3isop'][:])
+		#print np.sum(ff.variables['p_el_o3isop'][:])
 		data['el_o3isop']=np.array(ff.variables['p_el_o3isop'][:])
 	if (species=='soa' and 'p_sv_ohterp'in ff.variables):
-		print np.sum(ff.variables['p_sv_ohterp'][:])
+		#print np.sum(ff.variables['p_sv_ohterp'][:])
 		data['sv_ohterp']=np.array(ff.variables['p_sv_ohterp'][:])
 	if (species=='soa' and 'p_sv_o3terp'in ff.variables):
-		print np.sum(ff.variables['p_sv_o3terp'][:])
+		#print np.sum(ff.variables['p_sv_o3terp'][:])
 		data['sv_o3terp']=np.array(ff.variables['p_sv_o3terp'][:])
 	if (species=='soa' and 'p_sv_ohisop'in ff.variables):
-		print np.sum(ff.variables['p_sv_ohisop'][:])
+		#print np.sum(ff.variables['p_sv_ohisop'][:])
 		data['sv_ohisop']=np.array(ff.variables['p_sv_ohisop'][:])
 	if (species=='soa' and 'p_sv_o3isop'in ff.variables):
-		print np.sum(ff.variables['p_sv_o3isop'][:])
+		#print np.sum(ff.variables['p_sv_o3isop'][:])
 		data['sv_o3isop']=np.array(ff.variables['p_sv_o3isop'][:])
 	return data
 def read_voc(filein):
@@ -150,60 +145,40 @@ def mass_budget(filein):
 	data=np.zeros((6,6,12,90,120))
 	pd=np.zeros((2,2,12,34,90,120))
 	names=['bc','oa','soa','so4','ss','dust']
-	# data[0,:4,:1,:,:]=np.array(read_data(filein,'bc'))
-	# data[1,:4,:1,:,:]=np.array(read_data(filein,'oa'))
-	# data[2,:4,:1,:,:]=np.array(read_data(filein,'soa'))
-	# data[3,:4,:1,:,:]=np.array(read_data(filein,'so4'))
-	# data[4,:4,:1,:,:]=np.array(read_data(filein,'ss'))
-	# data[5,:4,:1,:,:]=np.array(read_data(filein,'dust'))
 	for i in range(len(names)):
 		data[i,:4,:,:,:]=np.array(read_data(filein,names[i]))
 	
-	#data[0,:4,:,:,:]=np.array(read_data(filein,'bc'))
-	#data[1,:4,:,:,:]=np.array(read_data(filein,'oa'))
-	#data[2,:4,:,:,:]=np.array(read_data(filein,'so4'))
-	#data[3,:4,:,:,:]=np.array(read_data(filein,'ss'))
-	#data[4,:4,:,:,:]=np.array(read_data(filein,'dust'))
 	pd[0,:,:,:,:,:]=np.array(prod_data(filein,'so4'))
 	pd[1,:,:,:,:,:]=np.array(prod_data(filein,'soa'))
 	pdsource=prod_data_source(filein,'soa')
 
-	#soa=read_data(filein,'soa')
-	#pgso4=read_data(filein,'prod_gas_so4')
-	#plso4=read_data(filein,'prod_liq_so4')
-	#pelvoc=read_data(filein,'prod_elvoc')
-	#psvoc=read_data(filein,'prod_svoc')
-	#print np.shape(data)
 	days=np.array([31,28,31,30,31,30,31,31,30,31,30,31])
 
 	gb=get_gridboxarea('TM53x2')
+	# calculate SOA production in the OLD scheme from 1x1 deg data
 	for i in pdsource:
 		temp=0
 		for m in range(12):
 				for j in range(34):
 					temp+=np.sum(pdsource[i][m,j,:,:]*gb[:,:]*3600*24*days[m])
 		print i,': ',temp*1e-9
-	#data=np.mean(data,2)
+	# calcualte the global budgetdata 
 	dataglobal=np.zeros((6,4))
 	for j in range(6):
 		for i in range(4):
 			for m in range(12):
-				#print np.shape(data)
-				#print data[j,i,m,0,0]
 				if i <3:
 					dataglobal[j,i]+=np.sum(data[j,i,m,:,:]*gb[:,:]*3600*24*days[m])
 				else:
 					dataglobal[j,i]+=np.sum(data[j,i,m,:,:]*gb[:,:])*days[m]
 	dataglobal=dataglobal
+	# calculate chemical production of SOA and SO4
 	proddata=np.zeros((2,2))
 	for k in range(2):
 		for i in range(2):
 			for m in range(12):
 				for j in range(34):
-					#print np.sum(pd[0,i,0,j,:,:]*gb[:,:]*3600*24*daus[m])
 					proddata[k,i]+=np.sum(pd[k,i,m,j,:,:]*gb[:,:]*3600*24*days[m])
-					#proddata2[k,i]+=np.sum(pd[k,i,0,j,:,:]*gb[:,:]*3600*24*365)
-			#print proddata[k,i]
 	proddata=proddata
 	print filein
 	C_ratio_elvoc= (10*16)/(10*16+16*1.+7*12)
@@ -455,15 +430,6 @@ if __name__=='__main__':
 			#print np.shape(data['newsoa-ri'][0])
 			data[exp][3][0,0,:,0,:,:]=oldsoadata
 			data[exp][0][2,0]=oldsoadata.sum()#*grid
-	#data[EXPS[0]]=budgetonly('/Users/bergmant/Documents/Project/tm5-SOA/output/general_TM5_soa-riccobono_2010.mm.nc')
-	#data[exp]=budgetonly('/Users/bergmant/Documents/Project/tm5-SOA/output/general_TM5_oldsoa-final_2010.mm.nc')
-	#data['nosoa']=budgetonly('/Users/bergmant/Documents/Project/tm5-SOA/output/general_TM5_nosoa_2010.mm.nc')
-	#print data[EXPS[0]][0].shape
-	#print data[EXPS[0]][1].shape
-	#print data[EXPS[0]][2].shape
-	#print data[EXPS[0]][3].shape
-	#print data[EXPS[0]][4].shape
-	#print data[EXPS[0]][5].shape
 	lon,lat=lonlat('TM53x2')
 	gb=get_gridboxarea('TM53x2')
 		
@@ -671,9 +637,6 @@ if __name__=='__main__':
 
 
 	# f,ax=plt.subplots(1)
-	# print testisumma
-	# print 'Old SOA emis',((np.squeeze(oldTM5)).mean(0)*3600*24*365*gb).sum()
-	# print 'NEW SOA prod',((np.squeeze(np.sum(data[EXPS[0]][3][1,:,:,:,:,:],axis=(0,2)))).mean(0)*3600*24*365*gb).sum()
 	# mapit_boundary((np.squeeze(np.sum(data[EXPS[0]][3][1,:,:,:,:,:],axis=(0,2)))).mean(0)*1e3*3600*24*365,[0.1,2,5,10,15,25,50,100],ax,False,cblabel='SOA production [g m-2]')
 	# ax.set_title('Annual production of NEWSOA in [g]')
 	# f.savefig(output_png_path+'/production/NEWSOA_annual_production_SOA.png',dpi=400)
