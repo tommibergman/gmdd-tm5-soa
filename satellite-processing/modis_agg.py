@@ -4,12 +4,8 @@ import os
 import datetime
 def aggregate_and_collocate_MODIS(exp,var='od550aer'):
 	input_MODIS_location = '/Volumes/Utrecht/MODIS_masked/'
-	input_MODIS_location = '//Users/bergmant/Documents/obs-data/MODIS_masked/'
-	MODIS_masked_location = '/Volumes/Utrecht/MODIS_masked/'
-	output_aggregated_location = '/Users/bergmant/Documents/MODIS_AGG-test/'
-	#output_aggregated_location = 'CCI/aggregated_cci/'
-	#3output_col_location = '/Volumes/Utrecht/CCI/cci_tm5_col/'
-	output_col_location = '/Users/bergmant/Documents/MODIS_COL-test/'
+	output_aggregated_location = '/Volumes/Utrecht//MODIS_aggregated/'
+	output_col_location = '/Volumes/Utrecht/MODIS_collocated/'
 
 	QA_Flag = 'AOD_550_Dark_Target_Deep_Blue_Combined_QA_Flag'
 	AOD = 'AOD_550_Dark_Target_Deep_Blue_Combined'
@@ -17,7 +13,7 @@ def aggregate_and_collocate_MODIS(exp,var='od550aer'):
 	AOD_tm5=var#'od550aer'
 
 	#tm5data='/Volumes/Utrecht/'+exp+'/general_TM5_'+exp+'_2010.lev0.'+var+'.nc' 
-	tm5data='/Users/bergmant/Documents/tm5-soa/output/raw/'+'/general_TM5_'+exp+'_2010.lev0.'+var+'.nc'
+	tm5data='tm5-soa/output/raw/'+'/general_TM5_'+exp+'_2010.lev0.'+var+'.nc'
 	#'/Volumes/Utrecht/'+exp+'/general_TM5_'+exp+'_2010.lev0.'+var+'.nc' 
 	if not os.path.isfile(tm5data):
 		print "TM5 data not found, exiting!"
@@ -39,12 +35,11 @@ def aggregate_and_collocate_MODIS(exp,var='od550aer'):
 				print "day " +str(day).zfill(3) #prints day DDD
 				
 
-				#CCI_SU_Filenames = str(year)+str(mon).zfill(2)+"*-ESACCI-L2P_AEROSOL-AER_PRODUCTS-AATSR_ENVISAT-SU_*.nc"
-				#CCI_SU_fname_out = 'ESACCI-L2P-AATSR-SU'
-				#CCI_SU = input_CCI_SU_location+str(year)+"_"+str(mon).zfill(2)+"_"+str(day).zfill(2)+'/' +CCI_SU_Filenames
-				MODIS_MYD_Filenames='Masked_QA2_MYD04_L2_2010_'+str(dayofyear).zfill(3)+'.????.nc'
-				MODIS_MOD_Filenames='Masked_QA2_MOD04_L2_2010_'+str(dayofyear).zfill(3)+'.????.nc'
-				MODIS_in = input_MODIS_location+'/' +MODIS_MYD_Filenames
+				MODIS_Filenames='Masked_QA2_*_L2_2010_'+str(dayofyear).zfill(3)+'.????.nc'
+				#MODIS_MYD_Filenames='Masked_QA2_MYD04_L2_2010_'+str(dayofyear).zfill(3)+'.????.nc'
+				#MODIS_MOD_Filenames='Masked_QA2_MOD04_L2_2010_'+str(dayofyear).zfill(3)+'.????.nc'
+				MODIS_in = input_MODIS_location+'/' +MODIS_Filenames
+				#MODIS_in = input_MODIS_location+'/' +MODIS_MYD_Filenames
 				aggregated_MODIS_fname_out='MOD04_MYD04_L2_2010_QA2_aggregated.'
 				#Masked_data_filename = 'MOD04_L2_2010_'+str(day).zfill(3)+"."+str(hours).zfill(2)+str(minutes).zfill(2)+'.nc'
 
@@ -109,7 +104,7 @@ def Mask_QA_MODIS():
 	Level=2
 	input_MODIS_location_MOD = '/Volumes/Utrecth/MODIS/6/MOD04_L2/2010/'
 	input_MODIS_location_MYD = '/Volumes/Utrecth/MODIS/6/MYD04_L2/2010/'
-	output_masked_location = '/Users/bergmant/obs-data/Masked_data_MODIS/'
+	output_masked_location = '/Volumes/Utrecht/MODIS_masked/'
 	for day in range(1,366):
 		for hours in range(24):
 			for minutes in range(0,60,5):
@@ -133,8 +128,11 @@ def Mask_QA_MODIS():
 
 def main():
 	from timeit import default_timer as timer
-	Mask_QA_MODIS()
+	#Mask_QA_MODIS()
+	start=timer()
 	aggregate_and_collocate_MODIS('oldsoa-bhn','od550aer')
+	end=timer()
+	print 'Time elapsed for collocation: ',end-start
 	start=timer()
 	aggregate_and_collocate_MODIS('newsoa-ri','od550aer')
 	end=timer()
