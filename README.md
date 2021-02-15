@@ -3,6 +3,8 @@ scripts for data processing for TM5-SOA description paper to be submitted to GMD
 
 ## commandline
 
+For the plotting of satellite figures scripts in satellite-processing need to be run first. 
+
 The code here can be used plot the following figures in the paper.
 
 ## Fig4:
