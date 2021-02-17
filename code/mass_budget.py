@@ -76,7 +76,7 @@ def read_load(filein,species=['bc','oa','soa','so4','ss','dust']):
 	return loaddata
 	pass
 def read_old_SOA():
-	fsoa=nc.Dataset('/Users/bergmant/Documents/tm5-soa/output/SOA.nc','r')
+	fsoa=nc.Dataset(fixeddata+'/SOA.nc','r')
 	olddata=fsoa.variables['FIELD'][:]
 	gb1d=fsoa.variables['GRIDBOX_AREA'][:]
 	return olddata*2.4/1.15,gb1d
@@ -374,7 +374,7 @@ def convert_1x1_2_3x2(indata):
 
 def load_original_production_soa():
 	# SOA production stored in C/gridbox (1x1 grid) 
-	fsoa=nc.Dataset('/Users/bergmant/Documents/tm5-soa/output/SOA.nc','r')
+	fsoa=nc.Dataset(fixeddata+'/SOA.nc','r')
 	olddata=fsoa.variables['FIELD'][:]
 
 	gb1d=fsoa.variables['GRIDBOX_AREA'][:]
@@ -407,7 +407,7 @@ if __name__=='__main__':
 	data={}
 	monthlengths=[31,28,31,30,31,30,31,31,30,31,30,31]
 	for exp in EXPS:
-		data[exp]=budgetonly('/Users/bergmant/Documents/tm5-soa/output/general_TM5_'+exp+'_2010.mm.nc')
+		data[exp]=budgetonly(basepathraw+'/'+exp+'/general_TM5_'+exp+'_2010.mm.nc')
 		#for kk in range(6):
 			#	for jj in range(4):
 			#print exp,np.shape(data[exp][kk])

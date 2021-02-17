@@ -8,12 +8,12 @@ import os
 #sys.path.append("/Users/bergmant/Documents/Project/ifs+tm5-validation/scripts")
 #from colocate_aeronet import do_colocate
 import matplotlib as mpl
-import read_colocation_aeronet as ra
+#import read_colocation_aeronet as ra
 import datetime
 import scipy.stats as stats
 import glob
 import subprocess
-from bivariate_fit import bivariate_fit
+#from bivariate_fit import bivariate_fit
 from matplotlib.colors import LogNorm
 import xarray as xr
 import re
@@ -701,7 +701,7 @@ l_do_aggregate=False
 l_do_collocate=False
 #l_collocate=True
 for i in experiment_paths:
-	input_TM5_data = '/Users/bergmant/Documents/tm5-soa/output/raw/general_TM5_'+i+'_2010.lev0.od550aer.nc'
+	input_TM5_data = '/Users/bergmant/Documents/tm5-soa/output/raw/'+i+'/general_TM5_'+i+'_2010.lev0.od550aer.nc'
 	output_col= '/Users/bergmant/Documents/tm5-soa/output/processed/col_aeronet_'+i+'-2010-550/'
 
 	experiment_paths[i]={'inputdata':input_TM5_data,'collocated':output_col}
@@ -713,7 +713,7 @@ for i in experiment_paths:
 				os.mkdir(output_col)
 			os.mkdir(output_col+'/all')
 
-		do_colocate(AODmodel,AODdata,input_TM5_data,output_col,aeronet)
+		do_colocate(AODmodel,AODdata,input_TM5_data,output_col,aeronet,2010)
 	if l_do_aggregate:
 		output_aggre=output_col+'/daily/'
 		if not os.path.isdir(output_aggre):

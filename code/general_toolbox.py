@@ -3,6 +3,7 @@ import netCDF4 as nc
 import xarray as xr
 import os
 import numpy as np
+from settings import fixeddata
 def read_mass(comp,inputdata):
 	data=nc.Dataset(inputdata,'r')
 	initdataset=True
@@ -21,7 +22,7 @@ def read_mass(comp,inputdata):
 
 def get_gridboxarea(grid, path=''):
 	if grid=='TM53x2':
-		gridareafile=path+'griddef_62.nc'
+		gridareafile=fixeddata+'/griddef_62.nc'
 		if os.path.isfile(gridareafile):
 			ncgb=nc.Dataset(gridareafile,'r')
 			gridarea=ncgb.variables['area']
@@ -42,7 +43,7 @@ def get_gridboxarea(grid, path=''):
 		print 'grid name unkown'
 		return False
 def get_gb_xr():
-	gbfile='griddef_62.nc'
+	gbfile=fixeddata+'/griddef_62.nc'
 	dsgb=xr.open_dataset(gbfile)
 #	gb=ncgb.variables['area']
 	return dsgb

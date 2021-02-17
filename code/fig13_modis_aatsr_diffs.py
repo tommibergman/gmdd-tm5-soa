@@ -8,10 +8,7 @@ from mpl_toolkits.basemap import Basemap
 from pylab import *
 import os
 import sys
-from lonlat import lonlat
 from settings import *
-from lonlat import lonlat
-import Colocate_MODIS as MODIS
 import string
 from settings import *
 def read_aatsr(var='od550aer'):
@@ -36,7 +33,7 @@ def read_aatsr(var='od550aer'):
 	AATSRdata=np.squeeze(nc.Dataset(AATSR,'r').variables['AOD550'][:]).transpose()
 	AATSRlon=nc.Dataset(AATSR,'r').variables['longitude'][:]
 	AATSRlat=nc.Dataset(AATSR,'r').variables['latitude'][:]
-	cellarea_file='/Users/bergmant/Documents/tm5-soa//output/ec-ei-an0tr6-sfc-glb100x100-0000-oro.nc'
+	cellarea_file=fixeddata+'/ec-ei-an0tr6-sfc-glb100x100-0000-oro.nc'
 	cellarea=nc.Dataset(cellarea_file,'r').variables['cell_area'][:].transpose()
 	
 	return AATSRdata,modeldata,AATSRlon,AATSRlat
@@ -120,9 +117,9 @@ def plot_aatsr_diff(AATSRdata,modeldata,AATSRlon,AATSRlat):
 	fAATSR.savefig(output_png_path+'aatsr/AATSR_2010.png',dpi=600)
 def read_modis(landsea_print=False):
 	
-	cellarea_file=output+'/ec-ei-an0tr6-sfc-glb100x100-0000-oro.nc'
+	cellarea_file=fixeddata+'/ec-ei-an0tr6-sfc-glb100x100-0000-oro.nc'
 	cellarea=nc.Dataset(cellarea_file,'r').variables['cell_area'][:]
-	lsm_file=output+'/ec-ei-an0tr6-sfc-glb100x100-lsm.nc'
+	lsm_file=fixeddata+'/ec-ei-an0tr6-sfc-glb100x100-lsm.nc'
 	lsm=nc.Dataset(lsm_file,'r').variables['lsm'][:]
 	#modis=output+'/TM5-MODIS//Aggregated_MODIS_L2_2010_1x1_yearmean.nc'
 	modis=basepathprocessed+'TM5-MODIS/MOD04_MYD04_L2_QA2_aggregated_2010_1x1_yearmean.nc'
@@ -138,7 +135,7 @@ def read_modis(landsea_print=False):
 	modeldata={}
 	for expi in EXPs:
 		print (expi)
-		model=output+'/col_MOD04_MYD04_QA2_L2_TM5_'+expi+'_2010_1x1_yearmean.nc'  #Aggregated_lin_Col_TM5_'+EXPs[0]+'_MYD04_MOD04_L2_2010_1x1_yearmean.nc'
+		model=basepathprocessed+'/col_MOD04_MYD04_QA2_L2_TM5_'+expi+'_2010_1x1_yearmean.nc'  #Aggregated_lin_Col_TM5_'+EXPs[0]+'_MYD04_MOD04_L2_2010_1x1_yearmean.nc'
 		#print (model)
 		#model2=output+'/col_MOD04_MYD04_QA2_L2_TM5_'+EXPs[1]+'_2010_1x1_yearmean.nc'
 		modeldata[expi]=np.squeeze(nc.Dataset(model,'r').variables['od550aer'][:].transpose())

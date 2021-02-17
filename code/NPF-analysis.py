@@ -5,7 +5,6 @@ from mpl_toolkits.basemap import Basemap
 import matplotlib as mpl
 import sys
 #sys.path.append("/Users/bergmant/Documents/Project/ifs+tm5-validation/scripts")
-from colocate_aeronet import do_colocate
 from general_toolbox import lonlat,read_var,monthlengths,get_gb_xr
 #from plot_m7 import read_var,modal_fraction,read_SD,plot_N_map,discretize_m7,discretize_mode,plot_mean_m7,plot_sd_pcolor,zonal
 import xarray as xr
@@ -17,7 +16,7 @@ data={}
 monthlengths=[31,28,31,30,31,30,31,31,30,31,30,31]
 for exp in EXPS:
 	data[exp]=xr.open_dataset('/Users/bergmant/Documents/tm5-soa/output/general_TM5_'+exp+'_2010.mm.nc')
-gb=xr.open_dataset('/Users/bergmant/Documents/python/tm5/griddef_62.nc')
+gb=xr.open_dataset(fixeddata+'/griddef_62.nc')
 gb=get_gb_xr()
 #test=xr.open_dataset('/Volumes/Utrecht/newsoa-ri/general_TM5_newsoa-ri_2010.lev1.nc')
 
