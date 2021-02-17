@@ -128,14 +128,14 @@ def Mask_QA_MODIS():
 
 def main():
 	from timeit import default_timer as timer
-	#Mask_QA_MODIS()
+	Mask_QA_MODIS()
 	start=timer()
 	aggregate_and_collocate_MODIS('oldsoa-bhn','od550aer')
 	end=timer()
-	print 'Time elapsed for collocation: ',end-start
+	print 'Time elapsed for collocation of oldsoa-bhn: ',end-start
 	start=timer()
 	aggregate_and_collocate_MODIS('newsoa-ri','od550aer')
 	end=timer()
-	print 'Time elapsed for collocation: ',end-start
+	print 'Time elapsed for collocation of newsoa-ri: ',end-start
 if __name__ == '__main__':
 	main()

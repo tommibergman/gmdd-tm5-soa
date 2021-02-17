@@ -1,7 +1,7 @@
 import glob
 import subprocess
-
-def aggre_cci(exp,var='od550aer'):
+from settings import rawoutput
+def aggregate_aatsr(exp,var='od550aer'):
 	input_CCI_SU_location = '/Volumes/Utrecht/CCI/'
 	output_masked_location = '/Volumes/Utrecht/MODIS_masked/'
 	output_aggregated_location = '/Volumes/Utrecht/CCI/aggregated_cci/'
@@ -13,7 +13,8 @@ def aggre_cci(exp,var='od550aer'):
 	year=2010
 	AOD_tm5=var#'od550aer'
 
-	tm5data='/Volumes/Utrecht/'+exp+'/general_TM5_'+exp+'_2010.lev0.'+var+'.nc' 
+	#tm5data='/Volumes/BIGDISK/'+exp+'/general_TM5_'+exp+'_2010.lev0.'+var+'.nc' 
+	tm5data=rawoutput+'/'+exp+'/general_TM5_'+exp+'_2010.lev0.'+var+'.nc' 
 
 	days=[31,28,31,30,31,30,31,31,30,31,30,31]
 	for mon in range(1,13):
@@ -87,10 +88,8 @@ def aggre_cci(exp,var='od550aer'):
 	#	print "cis col " +AOD_tm5+":"+tm5data+" "+output_aggregated_location+"ESACCI-L2P_AEROSOL-AER_PRODUCTS-AATSR_ENVISAT-SU_aggregated."+str(year)+".newfix.nc:variable="+AOD+"  -o "+col_outdata
 	#	subprocess.call("cis col " +AOD_tm5+":"+tm5data+" "+output_aggregated_location+"ESACCI-L2P_AEROSOL-AER_PRODUCTS-AATSR_ENVISAT-SU_aggregated."+str(year)+".newfix.nc:variable="+AOD+"  -o "+col_outdata , shell=True)	
 def main():
-	aggre_cci('oldsoa-bhn','od550soa')
-	aggre_cci('newsoa-ri','od550soa')
-	aggre_cci('oldsoa-bhn','od550aer')
-	aggre_cci('newsoa-ri','od550aer')
+	aggregate_aatsr('oldsoa-bhn','od550aer')
+	aggregate_aatsr('newsoa-ri','od550aer')
 		
 if __name__ == '__main__':
 	main()
