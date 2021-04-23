@@ -1,3 +1,4 @@
+[![DOI](https://zenodo.org/badge/313570273.svg)](https://zenodo.org/badge/latestdoi/313570273)
 # gmdd-tm5-soa
 scripts for data processing for TM5-SOA description paper to be submitted to GMD
 
