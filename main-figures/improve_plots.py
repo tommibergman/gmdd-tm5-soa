@@ -18,7 +18,9 @@ import improve_tools as improve_tools
 import logging
 #import plot_m7
 from settings import *
-# def site_type():
+SMALL_SIZE=12
+plt.rc('xtick', labelsize=SMALL_SIZE)    # fontsize of the tick labels
+plt.rc('ytick', labelsize=SMALL_SIZE)    # fontsize of the tick labels# def site_type():
 # 	# categorization from http://vista.cira.colostate.edu/improve/wp-content/uploads/2016/08/IMPROVE_V_FullReport.pdf
 # 	types={}
 # 	types['urban']=[10730023]
@@ -366,13 +368,13 @@ def main():
 		nmbmean=improve_tools.NMB(np.nanmean(meanmodelmon['obs'],axis=0),np.nanmean(meanmodelmon[exp],axis=0))
 		mbmean=improve_tools.MB(np.nanmean(meanmodelmon['obs'],axis=0),np.nanmean(meanmodelmon[exp],axis=0))
 		rmean=pearsonr(np.nanmean(meanmodelmon[exp],axis=0),np.nanmean(meanmodelmon['obs'],axis=0))
-		amean[0,n].annotate(('NMB (MB): %6.1f %% (%4.2f)')%(nmbmean*100,mbmean),xy=(0.03,0.95),xycoords='axes fraction',fontsize=10)
-		amean[0,n].annotate(('R: %6.2f')%(rmean[0]),xy=(0.03,0.9),xycoords='axes fraction',fontsize=10)
-		amean[0,n].set_xlabel('Month')
+		amean[0,n].annotate(('NMB (MB): %6.1f %% (%4.2f)')%(nmbmean*100,mbmean),xy=(0.01,0.95),xycoords='axes fraction',fontsize=12)
+		amean[0,n].annotate(('R: %6.2f')%(rmean[0]),xy=(0.01,0.9),xycoords='axes fraction',fontsize=12)
+		amean[0,n].set_xlabel('Month',fontsize=12)
 		#amean[0,n].set_ylabel('TM5:'+exp+' OM[pm25][ug m-3]')
-		amean[0,n].set_ylabel('OM[pm25][ug m-3]')
-		amean[0,n].annotate(('%s)')%(letters[0][n]),xy=(0.0,1.02),xycoords='axes fraction',fontsize=14)
-		amean[0,n].legend(loc='upper right')
+		amean[0,n].set_ylabel('OM[pm25][ug m-3]',fontsize=12)
+		amean[0,n].annotate(('%s)')%(letters[0][n]),xy=(0.0,1.02),xycoords='axes fraction',fontsize=18)
+		amean[0,n].legend(loc='upper right',fontsize=12)
 		#ax.fill_between(x, y1, y2, where=y2 <= y1, facecolor='red', interpolate=True)
 		print np.nanmean(meanmodelmon[exp],axis=0)
 		print 'teststste',n,exp
@@ -382,28 +384,28 @@ def main():
 		amean[1,n].plot([0.001,10000],[0.0001,1000],'k--')
 		amean[1,n].set_ylim([.5e-2,3e0])
 		amean[1,n].set_xlim([.5e-2,3e0])
-		amean[1,n].set_xlabel('IMPROVE OM[pm25][ug m-3]')
+		amean[1,n].set_xlabel('IMPROVE OM[pm25][ug m-3]',fontsize=12)
 		#amean[0,n].set_ylabel('TM5:'+exp+' OM[pm25][ug m-3]')
-		amean[1,n].set_ylabel(EXP_NAMEs[n] + ' OM[pm25][ug m-3]')
+		amean[1,n].set_ylabel(EXP_NAMEs[n] + ' OM[pm25][ug m-3]',fontsize=12)
 		amean[1,n].set_aspect('equal')			
 		#amean[1,n].legend(loc=4)
 		nmbmean=improve_tools.NMB(yearmean_obs,yearmean_model[exp])
 		mbmean=improve_tools.MB(yearmean_obs,yearmean_model[exp])
 		rmean=pearsonr(yearmean_model[exp],yearmean_obs)
 		rlogmean=pearsonr(np.log(yearmean_model[exp]),np.log(yearmean_obs))
-		amean[1,n].annotate(('NMB (MB): %5.1f %% (%4.2f)')%(nmbmean*100,mbmean),xy=(0.45,0.06),xycoords='axes fraction',fontsize=10)
-		amean[1,n].annotate(('R (R log): %6.2f, (%4.2f) ')%(rmean[0],rlogmean[0]),xy=(0.45,0.01),xycoords='axes fraction',fontsize=10)
-		amean[1,n].annotate(('%s)')%(letters[1][n]),xy=(0.0,1.02),xycoords='axes fraction',fontsize=14)
-			
+		amean[1,n].annotate(('NMB (MB): %5.1f %% (%4.2f)')%(nmbmean*100,mbmean),xy=(0.20,0.06),xycoords='axes fraction',fontsize=12)
+		amean[1,n].annotate(('R (R log): %6.2f, (%4.2f) ')%(rmean[0],rlogmean[0]),xy=(0.20,0.01),xycoords='axes fraction',fontsize=12)
+		amean[1,n].annotate(('%s)')%(letters[1][n]),xy=(0.0,1.02),xycoords='axes fraction',fontsize=18)
+		plt.tight_layout()
 
 	
 	std=np.nanstd(meanmodelmon['obs'],axis=0)
 	maxi=np.nanmax(meanmodelmon['obs'],axis=0)
 	mini=np.nanmin(meanmodelmon['obs'],axis=0)
-	fmean.suptitle('IMPROVE')
-	fmean.savefig(output_png_path+'/article/fig10_scatter-seasonal-IMPROVE-2x2.png',dpi=400)
+	#fmean.suptitle('IMPROVE',fontsize=12)
+	fmean.savefig(output_png_path+'/article/fig10_scatter-seasonal-IMPROVE-2x2.png',dpi=600)
 	fmean.savefig(output_pdf_path+'/article/fig10_scatter-seasonal-IMPROVE-2x2.pdf')
-	fmean.savefig(output_jpg_path+'/article/fig10_scatter-seasonal-IMPROVE-2x2.jpg',dpi=400)
+	fmean.savefig(output_jpg_path+'/article/fig10_scatter-seasonal-IMPROVE-2x2.jpg',dpi=600)
 	plt.show()
 
 

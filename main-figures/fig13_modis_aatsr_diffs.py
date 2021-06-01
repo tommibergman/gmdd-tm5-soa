@@ -11,6 +11,7 @@ import sys
 from settings import *
 import string
 from settings import *
+
 def read_aatsr(var='od550aer'):
 	
 	model=basepathprocessed+'CCI/col_ESACCI_SU_TM5.2010.ym.nc'
@@ -59,9 +60,9 @@ def plot_aatsr_diff(AATSRdata,modeldata,AATSRlon,AATSRlat):
 		m.drawcoastlines()
 		#print (np.shape(modeldata),np.shape(AATSRdata),np.shape(lons),np.shape(lats))
 		cs = m.pcolormesh(lons,lats,((modeldata[expi]-AATSRdata).squeeze()),latlon=True,norm=norm,cmap=mycmap)
-		c = plt.colorbar(cs,orientation='horizontal',ticks=bounds,aspect=30,pad=0.05,shrink=0.7)
-		c.set_label('AOD bias ['+EXP_NAMEs[i]+'-AATSR]',fontsize=18)
-		c.ax.tick_params(labelsize=10)
+		c = plt.colorbar(cs,orientation='horizontal',ticks=bounds,aspect=30,pad=0.05,shrink=0.9)
+		c.set_label('AOD bias ['+EXP_NAMEs[i]+'-AATSR]',fontsize=24)
+		c.ax.tick_params(labelsize=12)
 		f.savefig(output_pdf_path+'article/AOD-diff_'+EXP_NAMEs[i]+'-AATSR_2010.pdf')
 		f.savefig(output_png_path+'aatsr/AOD-diff_'+EXP_NAMEs[i]+'-AATSR_2010.png',dpi=600)
 
@@ -75,7 +76,7 @@ def plot_aatsr_diff(AATSRdata,modeldata,AATSRlon,AATSRlat):
 		# define the bins and normalize
 		bounds = [0.025,0.075,0.15,0.225,0.30,0.375,0.45,0.525,0.6,0.675,0.75]
 		norm = mpl.colors.BoundaryNorm(bounds, 11)
-		#plt.title('AOD collocated annual mean (TM5)',fontsize=18)
+		#plt.title('AOD collocated annual mean (TM5)',fontsize=24)
 		m = Basemap(projection='robin',lon_0=0,ax=ax)
 		m.drawcoastlines()
 		m.drawparallels(np.arange(-90.,120.,30.))
@@ -84,9 +85,9 @@ def plot_aatsr_diff(AATSRdata,modeldata,AATSRlon,AATSRlat):
 		# define the bins and normalize
 		norm = mpl.colors.BoundaryNorm(bounds, 11)
 		cs = m.pcolormesh(lons,lats,(modeldata[expi].squeeze()),norm=norm,latlon=True,cmap=mycmap)
-		c = plt.colorbar(cs,orientation='horizontal',ticks=bounds,aspect=30,pad=0.05,shrink=0.7)
-		c.set_label('AOD ['+EXP_NAMEs[i]+']',fontsize=18)
-		c.ax.tick_params(labelsize=10)
+		c = plt.colorbar(cs,orientation='horizontal',ticks=bounds,aspect=30,pad=0.05,shrink=0.9)
+		c.set_label('AOD ['+EXP_NAMEs[i]+']',fontsize=24)
+		c.ax.tick_params(labelsize=12)
 		#c.set_label('AOD relative bias [(TM5-AERONET)/AERONET]')
 		fsoa.savefig(output_pdf_path+'aatsr/TM5-'+EXP_NAMEs[i]+'_2010.pdf')
 		fsoa.savefig(output_png_path+'aatsr/TM5-'+EXP_NAMEs[i]+'_2010.png',dpi=600)
@@ -100,7 +101,7 @@ def plot_aatsr_diff(AATSRdata,modeldata,AATSRlon,AATSRlat):
 	# define the bins and normalize
 	bounds = [0.025,0.075,0.15,0.225,0.30,0.375,0.45,0.525,0.6,0.675,0.75]
 	norm = mpl.colors.BoundaryNorm(bounds, 11)
-	#plt.title('AOD collocated annual mean (AATSR)',fontsize=18)
+	#plt.title('AOD collocated annual mean (AATSR)',fontsize=24)
 	m = Basemap(projection='robin',lon_0=0,ax=ax)
 	m.drawcoastlines()
 	m.drawparallels(np.arange(-90.,120.,30.))
@@ -109,9 +110,9 @@ def plot_aatsr_diff(AATSRdata,modeldata,AATSRlon,AATSRlat):
 	# define the bins and normalize
 	norm = mpl.colors.BoundaryNorm(bounds, 11)
 	cs = m.pcolormesh(lons,lats,(AATSRdata.squeeze()),norm=norm,latlon=True,cmap=mycmap)
-	c = plt.colorbar(cs,orientation='horizontal',ticks=bounds,aspect=30,pad=0.05,shrink=0.7)
-	c.set_label('AOD [AATSR]',fontsize=18)
-	c.ax.tick_params(labelsize=10)
+	c = plt.colorbar(cs,orientation='horizontal',ticks=bounds,aspect=30,pad=0.05,shrink=0.9)
+	c.set_label('AOD [AATSR]',fontsize=24)
+	c.ax.tick_params(labelsize=12)
 	#c.set_label('AOD relative bias [(TM5-AERONET)/AERONET]')
 	fAATSR.savefig(output_pdf_path+'aatsr/AATSR_2010.pdf')
 	fAATSR.savefig(output_png_path+'aatsr/AATSR_2010.png',dpi=600)
@@ -173,9 +174,9 @@ def plot_modis_diff(modisdata,modeldata,modislon,modislat):
 		m.drawmeridians(np.arange(-180.,180.,60.))
 		m.drawcoastlines()
 		cs = m.pcolormesh(lons,lats,((modeldata[expi]-modisdata).squeeze()),norm=norm,latlon=True,cmap=mycmap)
-		c = plt.colorbar(cs,orientation='horizontal',ticks=bounds,aspect=30,pad=0.05,shrink=0.7)
-		c.set_label('AOD bias ['+EXP_NAMEs[i]+'-MODIS]',fontsize=18)
-		c.ax.tick_params(labelsize=10)
+		c = plt.colorbar(cs,orientation='horizontal',ticks=bounds,aspect=30,pad=0.05,shrink=0.9)
+		c.set_label('AOD bias ['+EXP_NAMEs[i]+'-MODIS]',fontsize=24)
+		c.ax.tick_params(labelsize=12)
 		print (np.mean(modisdata))
 		print (np.mean(modeldata[expi]))
 		print (np.max(modisdata))
@@ -196,9 +197,9 @@ def plot_modis_diff(modisdata,modeldata,modislon,modislat):
 		# define the bins and normalize
 		norm = mpl.colors.BoundaryNorm(bounds, 11)
 		cs = m.pcolormesh(lons,lats,(modeldata[expi].squeeze()),norm=norm,latlon=True,cmap=mycmap)
-		c = plt.colorbar(cs,orientation='horizontal',ticks=bounds,aspect=30,pad=0.05,shrink=0.7)
-		c.set_label('AOD [TM5]',fontsize=18)
-		c.ax.tick_params(labelsize=10)
+		c = plt.colorbar(cs,orientation='horizontal',ticks=bounds,aspect=30,pad=0.05,shrink=0.9)
+		c.set_label('AOD [TM5]',fontsize=24)
+		c.ax.tick_params(labelsize=12)
 		fsoa.savefig(output_pdf_path+'MODIS/TM5-'+EXP_NAMEs[i]+'_2010.pdf')
 		fsoa.savefig(output_png_path+'MODIS/TM5-'+EXP_NAMEs[i]+'_2010.png',dpi=600)
 		
@@ -219,8 +220,8 @@ def plot_modis_diff(modisdata,modeldata,modislon,modislat):
 	norm = mpl.colors.BoundaryNorm(bounds, 11)
 	cs = m.pcolormesh(lons,lats,(modisdata.squeeze()),norm=norm,latlon=True,cmap=mycmap)
 	c = plt.colorbar(cs,orientation='horizontal',ticks=bounds,aspect=30,pad=0.05,shrink=0.8)
-	c.set_label('AOD [MODIS]',fontsize=18)
-	c.ax.tick_params(labelsize=10)
+	c.set_label('AOD [MODIS]',fontsize=24)
+	c.ax.tick_params(labelsize=12)
 	fmodis.savefig(output_pdf_path+'MODIS/MODIS_2010.pdf')
 	fmodis.savefig(output_png_path+'MODIS/MODIS_2010.png',dpi=600)
 def plot_both(data,bounds=[-0.375,-0.3,-0.225,-0.15,-0.075,-0.025,0.025,0.075,0.15,0.225,0.30,0.375]):
@@ -238,7 +239,7 @@ def plot_both(data,bounds=[-0.375,-0.3,-0.225,-0.15,-0.075,-0.025,0.025,0.075,0.
 		mycmap=plt.get_cmap('coolwarm',11) 
 		# define the bins and normalize
 		norm = mpl.colors.BoundaryNorm(bounds, 11)
-		#plt.title('AOD collocated annual mean (MODIS)',fontsize=18)
+		#plt.title('AOD collocated annual mean (MODIS)',fontsize=24)
 		m = Basemap(projection='robin',lon_0=0,ax=axit[i])
 		m.drawcoastlines()
 		m.drawparallels(np.arange(-90.,120.,30.))
@@ -246,17 +247,19 @@ def plot_both(data,bounds=[-0.375,-0.3,-0.225,-0.15,-0.075,-0.025,0.025,0.075,0.
 		# define the bins and normalize
 		norm = mpl.colors.BoundaryNorm(bounds, 11)
 		cs = m.pcolormesh(lons,lats,((data[i]['modeldata']-data[i]['satdata']).squeeze()),norm=norm,latlon=True,cmap=mycmap)
-		c = plt.colorbar(cs,orientation='horizontal',ticks=bounds,aspect=30,pad=0.05,shrink=0.9,ax=axit[i])
-		c.ax.tick_params(labelsize=10)
+		c = plt.colorbar(cs,orientation='horizontal',ticks=bounds,aspect=30,pad=0.02,shrink=1.05,ax=axit[i])
+		c.ax.tick_params(labelsize=13)
 		name=name+'-'+data[i]['name']
-		c.set_label('AOD difference ['+data[i]['name']+']',fontsize=18)
-		axit[i].annotate(string.ascii_lowercase[i]+')',xy=(0.1+float(i)*0.45,0.85),xycoords='figure fraction',fontsize=18)
+		c.set_label('AOD difference ['+data[i]['name']+']',fontsize=20)
+		axit[i].annotate(string.ascii_lowercase[i]+')',xy=(0.05+float(i)*0.5,0.85),xycoords='figure fraction',fontsize=24)
 	return fcolumn,axit
 def main(all=False):
 	modisdata,modismodeldata,modislon,modislat=read_modis()
 	AATSRdata,aatsrmodeldata,aatsrlon,aatsrlat=read_aatsr()
 	f,a=plot_both([{"satdata":modismodeldata['oldsoa-bhn'],"modeldata":modismodeldata['newsoa-ri'],"lon":modislon,"lat":modislat,'name':'NEWSOA-OLDSOA'},{"satdata":aatsrmodeldata['oldsoa-bhn'],"modeldata":aatsrmodeldata['newsoa-ri'],"lon":aatsrlon,"lat":aatsrlat,'name':'NEWSOA-OLDSOA'}],[-0.0375,-0.03,-0.0225,-0.015,-0.0075,-0.0025,0.0025,0.0075,0.015,0.0225,0.030,0.0375])
+	plt.tight_layout()
 	f.savefig(output_png_path+'article/fig13_bias-MODIS-AATSR-satellite_2010.png',dpi=600)
+	f.savefig(output_pdf_path+'article/fig13_bias-MODIS-AATSR-satellite_2010.pdf',dpi=600)
 	if all:
 		plot_aatsr_diff(AATSRdata,aatsrmodeldata,aatsrlon,aatsrlat)
 		plot_modis_diff(modisdata,modismodeldata,modislon,modislat)

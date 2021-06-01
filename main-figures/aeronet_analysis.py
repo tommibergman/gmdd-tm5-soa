@@ -22,6 +22,10 @@ from matplotlib.patches import Polygon
 from settings import *
 from general_toolbox import str_months,RMSE,MFE,MFB,NMB,NME
 import string
+SMALL_SIZE=16
+plt.rc('xtick', labelsize=SMALL_SIZE)    # fontsize of the tick labels
+plt.rc('ytick', labelsize=SMALL_SIZE)    # fontsize of the tick labels# def site_type():
+
 # def RMSE(obs,model):
 # 	N=0
 # 	RMSE=0.0
@@ -191,17 +195,17 @@ def scatter_heat(obs,model,obsname=None,modelname=None):
 	xxx=np.logspace(-3,1,1000)
 	l3,=plt.plot(xxx,YY(xxx),'-b',lw=4)
 	#l55,=plt.plot(xxx,bb*xxx+aa,'-g',lw=4)
-	plt.title('Individual observations',fontsize=14)
-	plt.xlabel(obsname+' 2010 per point',fontsize=14)
-	plt.ylabel(modelname+' collocated 2010 per point',fontsize=14)
-	plt.legend([l2,l3],['1:1 line','Fitted'],loc=2,numpoints=1,fontsize=14)
+	plt.title('Individual observations',fontsize=24)
+	plt.xlabel(obsname+' 2010 per point',fontsize=24)
+	plt.ylabel(modelname+' collocated 2010 per point',fontsize=24)
+	plt.legend([l2,l3],['1:1 line','Fitted'],loc=2,numpoints=1,fontsize=24)
 	#plt.legend([l1,l2,l3],['Colocated annual mean','1:1 line','Fitted'],loc=2,numpoints=1)
 	plt.annotate('Slope:         %6.2f\nintercept:   %6.2f\nR:               %6.2f'%(slope,intercept,r), 
 				xy=(0.02, 0.67), xycoords='axes fraction'
-				,fontsize=14)
+				,fontsize=24)
 	#plt.annotate('Slope:         %6.2f\nintercept:   %6.2f\nR:               %6.2f'%(bb,aa,-1), 
 	#            xy=(0.02, 0.27), xycoords='axes fraction'
-	#            ,fontsize=14)
+	#            ,fontsize=24)
 	cb=plt.colorbar()
 	cb.set_label('Number of observations')
 	#plt.figure()
@@ -256,9 +260,10 @@ def scatter_dot(obs,model,**kwargs):
 	ax.set_xscale('log')
 	ax.set_yscale('log')
 	
-	#ax.set_title('Annual means',fontsize=14)
-	ax.set_xlabel(obsname+' 2010 ',fontsize=14)
-	ax.set_ylabel(modelname+' collocated 2010 ',fontsize=14)
+	#ax.set_title('Annual means',fontsize=24)
+	ax.set_xlabel(obsname+' 2010 ',fontsize=24)
+	ax.set_ylabel(modelname+' collocated 2010 ',fontsize=24)
+	
 	return slope,intercept,r,p,stderr
 
 def get_regions():
@@ -419,17 +424,18 @@ def map_bias(obs,model,**kwargs):
 		annual_obs.append(np.mean(obs[i][4][:]))
 		cs=m.scatter(x1,y1,marker='o',c=reldiff,s=300*(np.mean(ref[i][4][:])),norm=norm,cmap = mycmap )
 	c = plt.colorbar(cs,orientation='horizontal',ticks=bounds,aspect=30,pad=0.05,shrink=0.85,extend='both',ax=axs)
-	c.ax.tick_params(labelsize=10)
-	c.set_label('AOD relative change [('+name2+'-'+name1+')/'+name1+']')
+	c.ax.tick_params(labelsize=14)
+	c.set_label('AOD relative change [('+name2+'-'+name1+')/'+name1+']',fontsize=18)
 	xx,yy=m(-160,-70)
 	m.scatter(xx,yy,marker='o',c=0,s=300,norm=norm,cmap = mycmap)
 	xx,yy=m(-150,-70)
-	plt.text(xx,yy,'AOD 1.0')
+	axs.annotate('AOD 1.0',xy=(xx,yy),xycoords='data',xytext=(xx,yy),textcoords='data')
 	#print xx,yy
 	xx,yy=m(-160,-60)
 	m.scatter(xx,yy,marker='o',c=0,s=150,norm=norm,cmap = mycmap)
 	xx2,yy2=m(-150,-60)
-	plt.text(xx2,yy2,'AOD 0.5')
+	axs.annotate('AOD 0.5',xy=(xx2,yy2),xycoords='data',xytext=(xx2,yy2),textcoords='data')
+	#plt.text(xx2,yy2,'AOD 0.5')
 	return axs
 
 def categorize(obs,model):
@@ -788,7 +794,7 @@ for index,reg in enumerate(colordict):
 
 	plot_rectangle(m,lonmin,lonmax,latmin,latmax,color=colordict[reg])
 	x, y = m(lonmin,latmin)
-	ax_scat_comb[1,1].annotate(reg, xy=(x, y), xycoords='data', xytext=(x, y), textcoords='data',color='w')
+	ax_scat_comb[1,1].annotate(reg, xy=(x, y), xycoords='data', xytext=(x, y), textcoords='data',color='w',fontsize=14)
 	for i in aeronet_regions[reg]:
 		
 		if not np.ma.is_masked(aeronet_regions[reg][i][4]):
@@ -834,13 +840,13 @@ ax_scat_comb[1,0].plot(np.linspace(0,11,12),n_month,'k',label='AERONET')
 ax_scat_comb[1,0].plot(np.linspace(0,11,12),n_month_new,'r',label=EXP_NAMEs[0])
 ax_scat_comb[1,0].plot(np.linspace(0,11,12),n_month_old,'b',label=EXP_NAMEs[1])
 ax_scat_comb[1,0].set_xticks(np.linspace(0,11,12))
-ax_scat_comb[1,0].set_xticklabels(str_months())
-ax_scat_comb[1,0].set_xlabel('Month')
-ax_scat_comb[1,0].set_ylabel('AOD [1]')
+ax_scat_comb[1,0].set_xticklabels(str_months(),fontsize=16)
+ax_scat_comb[1,0].set_xlabel('Month',fontsize=24)
+ax_scat_comb[1,0].set_ylabel('AOD [1]',fontsize=24)
 
-ax_scat_comb[0,0].legend(loc=4)
-ax_scat_comb[1,0].legend(loc=3)
-ax_scat_comb[0,1].legend(loc=4)
+ax_scat_comb[0,0].legend(loc=4,fontsize=14)
+ax_scat_comb[1,0].legend(loc=3,fontsize=14)
+ax_scat_comb[0,1].legend(loc=4,fontsize=14)
 #print (aeronet_data_dict['all'].keys())
 aero_R=[]
 TM5n_R=[]
@@ -850,17 +856,17 @@ for site in aeronet_data_dict['yearly']:
 		aero_R.append(aeronet_data_dict['yearly'][site][4])
 		TM5n_R.append(TM5NEWdatadict['yearly'][site][4])
 		TM5o_R.append(TM5OLDdatadict['yearly'][site][4])
-ax_scat_comb[0,0].annotate('R : %5.2f '%(stats.pearsonr(np.array(TM5n_R),np.array(aero_R))[0]),xy=(0.05,0.95),xycoords='axes fraction',fontsize=12)
-ax_scat_comb[0,0].annotate('MB : %5.3f '%(np.mean(np.array(TM5n_R))-np.mean(np.array(aero_R))),xy=(0.05,0.90),xycoords='axes fraction',fontsize=12)
-ax_scat_comb[0,1].annotate('R : %5.2f '%(stats.pearsonr(np.array(TM5o_R),np.array(aero_R))[0]),xy=(0.05,0.95),xycoords='axes fraction',fontsize=12)
-ax_scat_comb[0,1].annotate('MB : %5.3f'%(np.mean(np.array(TM5o_R))-np.mean(np.array(aero_R))),xy=(0.05,0.90),xycoords='axes fraction',fontsize=12)
+ax_scat_comb[0,0].annotate('R : %5.2f '%(stats.pearsonr(np.array(TM5n_R),np.array(aero_R))[0]),xy=(0.05,0.95),xycoords='axes fraction',fontsize=14)
+ax_scat_comb[0,0].annotate('MB : %5.3f '%(np.mean(np.array(TM5n_R))-np.mean(np.array(aero_R))),xy=(0.05,0.90),xycoords='axes fraction',fontsize=14)
+ax_scat_comb[0,1].annotate('R : %5.2f '%(stats.pearsonr(np.array(TM5o_R),np.array(aero_R))[0]),xy=(0.05,0.95),xycoords='axes fraction',fontsize=14)
+ax_scat_comb[0,1].annotate('MB : %5.3f'%(np.mean(np.array(TM5o_R))-np.mean(np.array(aero_R))),xy=(0.05,0.90),xycoords='axes fraction',fontsize=14)
 k=0
 for i in range(2):
 	for j in range(2):
 		if k==3:
-			ax_scat_comb[i,j].annotate(string.ascii_lowercase[k]+')',xy=(0.01,1.51),xycoords='axes fraction',fontsize=18)
+			ax_scat_comb[i,j].annotate(string.ascii_lowercase[k]+')',xy=(0.01,1.51),xycoords='axes fraction',fontsize=20)
 		else:
-			ax_scat_comb[i,j].annotate(string.ascii_lowercase[k]+')',xy=(0.01,1.01),xycoords='axes fraction',fontsize=18)
+			ax_scat_comb[i,j].annotate(string.ascii_lowercase[k]+')',xy=(0.01,1.01),xycoords='axes fraction',fontsize=20)
 		k+=1
 f_scat_comb.savefig(output_png_path+'article/fig14_scatter_categorized_log_seasonal_map.png',dpi=600)
 f_scat_comb.savefig(output_pdf_path+'/article/fig14_scatter_categorized_log_seasonal_map.pdf')
@@ -914,10 +920,10 @@ aeronet_table_latex.close()
 
 f_2panel_diff_old_diff_aeronet,axit=plt.subplots(nrows=1,ncols=2,figsize=(20,6))
 map_bias(TM5OLDdatadict['all'],TM5NEWdatadict['all'],ax=axit[0],boundmax=0.5,name1='OLDSOA',name2='NEWSOA',bounds=[-0.5,-0.35,-0.15,-0.05,-0.03,-0.01,0.01,0.03,0.05,0.15,0.35,0.5],ref=aeronet_data_dict['all'])
-axit[0].annotate('a)',xy=(0.05,0.95),xycoords='axes fraction',fontsize=18)
+axit[0].annotate('a)',xy=(0.05,0.95),xycoords='axes fraction',fontsize=20)
 map_bias(aeronet_data_dict['all'],TM5NEWdatadict['all'],ax=axit[1],boundmax=1.1,name1='AERONET',name2='NEWSOA')
-axit[1].annotate('b)',xy=(0.05,0.95),xycoords='axes fraction',fontsize=18)
-
+axit[1].annotate('b)',xy=(0.05,0.95),xycoords='axes fraction',fontsize=20)
+plt.tight_layout()
 f_2panel_diff_old_diff_aeronet.savefig(output_png_path+'/article/fig15_map-2panel-aeronet-oldsoa.png',dpi=600)
 f_2panel_diff_old_diff_aeronet.savefig(output_pdf_path+'/article/fig15_map-2panel-aeronet-oldsoa.pdf')
 

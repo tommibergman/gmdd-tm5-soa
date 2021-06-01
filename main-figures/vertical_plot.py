@@ -9,12 +9,15 @@ import matplotlib as mpl
 import sys
 #sys.path.append("/Users/bergmant/Documents/Project/ifs+tm5-validation/scripts")
 #sys.path.append("/Users/bergmant/Documents/python/aeronet/")
-from colocate_aeronet import do_colocate
-from general_toolbox import read_var#,read_SD
-from lonlat import lonlat
+#from colocate_aeronet import do_colocate
+from general_toolbox import read_var, lonlat#,read_SD
+
 #from plot_m7 import read_var,modal_fraction,read_SD,plot_N_map,discretize_m7,discretize_mode,plot_mean_m7,plot_sd_pcolor,zonal
 #import ngl
 from settings import *
+SMALL_SIZE=14
+plt.rc('xtick', labelsize=SMALL_SIZE)    # fontsize of the tick labels
+plt.rc('ytick', labelsize=SMALL_SIZE)    # fontsize of the tick labels# def site_type():
 def read_soa(infile):
 	comp='SOA'
 	modes=['NUS','AIS','ACS','COS','AII']
@@ -22,7 +25,7 @@ def read_soa(infile):
 	for i in modes:
 		var='M_'+comp+i
 		vardata=read_var(infile,var)
-		print vardata[0]
+		#print vardata[0]
 		data[i]=vardata[0]
 	outdata=np.zeros_like(data['NUS'][:])
 	for i in modes:
@@ -134,34 +137,41 @@ def main():
 	norm = BoundaryNorm(boundaries=levels, ncolors=256)
 	data=(SOAnew[:,:,:,:].mean(axis=(0,3)))*1e9
 	cs1=a[0].contourf(lat,np.linspace(1,35,34),data,levels=levels,cmap=mycmap,norm=norm)
-	a[0].set_ylabel('Model level')
-	a[0].set_xlabel('Latitude')
-	a[0].set_title('NEWSOA')
+	a[0].set_ylabel('Model level',fontsize=18)
+	a[0].set_xlabel('Latitude',fontsize=18)
+	a[0].set_title('NEWSOA',fontsize=20)
 	a[0].set_ylim([1,34])
-	a[0].annotate('a)',xy=(0.05,0.95),xycoords='axes fraction',fontsize=14)
-	f.colorbar(cs1,ax=a[0],label='SOA [ug m$^{-3}$]', orientation='horizontal')
+	a[0].annotate('a)',xy=(0.05,0.95),xycoords='axes fraction',fontsize=18)
+	cbar=f.colorbar(cs1,ax=a[0],label='SOA [ug m$^{-3}$]', orientation='horizontal')
+	cbar.set_label('SOA [ug m$^{-3}$]',fontsize=18)
+	cbar.ax.tick_params(labelsize=16)
 
 	data=(SOAold[:,:,:,:].mean(axis=(0,3)))*1e9
 	cs2=a[1].contourf(lat,np.linspace(1,35,34),data,levels=levels,cmap=mycmap,norm=norm)
-	a[1].set_ylabel('Model level')
+	a[1].set_ylabel('Model level',fontsize=18)
 	#a[1].set_xlabel('SOA [ug m$^{-3}$]')
-	a[1].set_xlabel('Latitude')
-	f.colorbar(cs2,ax=a[1],label='SOA [ug m$^{-3}$]', orientation='horizontal')
-	a[1].set_title('OLDSOA')
+	a[1].set_xlabel('Latitude',fontsize=18)
+	cbar=f.colorbar(cs2,ax=a[1],label='SOA [ug m$^{-3}$]', orientation='horizontal')
+	cbar.set_label('SOA [ug m$^{-3}$]',fontsize=18)
+	cbar.ax.tick_params(labelsize=16)
+	a[1].set_title('OLDSOA',fontsize=20)
 	a[1].set_ylim([1,34])
-	a[1].annotate('b)',xy=(0.05,0.95),xycoords='axes fraction',fontsize=14)
+	a[1].annotate('b)',xy=(0.05,0.95),xycoords='axes fraction',fontsize=18)
 	mycmap=plt.get_cmap('RdBu_r')
 	ratio=(SOAnew[:,:,:,:].mean(axis=(0,3))-SOAold[:,:,:,:].mean(axis=(0,3)))/SOAold[:,:,:,:].mean(axis=(0,3))*100
 	cs3=a[2].contourf(lat,np.linspace(1,35,34),ratio,cmap=mycmap,levels=[-125,-100,-75,-50,-25,-5,5,25,50,75,100,125])
 	a[2].set_ylim([1,34])
-	a[2].set_ylabel('Model level')
-	a[2].set_xlabel('Latitude')
-	cbar=f.colorbar(cs3, orientation='horizontal',label='Change in SOA concentration [%]',ticks=[-125,-100,-75,-50,-25,-5,5,25,50,75,100,125])
+	a[2].set_ylabel('Model level',fontsize=18)
+	a[2].set_xlabel('Latitude',fontsize=18)
+	cbar=f.colorbar(cs3, orientation='horizontal',ticks=[-125,-100,-75,-50,-25,-5,5,25,50,75,100,125])
+	cbar.set_label('Change in SOA concentration [%]',fontsize=16)
+	cbar.ax.tick_params(labelsize=16)
 
 	#cbar.ax.set_yticklabels()
 	#a[2].clabel('ratio (NEWSOA-OLDSOA)/OLDSOA')
-	a[2].set_title('Relative difference')
-	a[2].annotate('c)',xy=(0.05,0.95),xycoords='axes fraction',fontsize=14)
+	a[2].set_title('Relative difference',fontsize=20)
+	a[2].annotate('c)',xy=(0.05,0.95),xycoords='axes fraction',fontsize=18)
+	plt.tight_layout()
 	f.savefig(output_png_path+'/article/fig6_SOA_concentrations_zonal.png',dpi=600)
 	f.savefig(output_pdf_path+'/article/fig6_SOA_concentrations_zonal.pdf')
 	f.savefig(output_jpg_path+'/article/fig6_SOA_concentrations_zonal.jpg',dpi=600)

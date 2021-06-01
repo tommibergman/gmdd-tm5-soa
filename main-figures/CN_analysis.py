@@ -16,6 +16,9 @@ import improve_plots
 import logging
 import matplotlib as mpl
 from settings import *
+SMALL_SIZE=14
+plt.rc('xtick', labelsize=SMALL_SIZE)    # fontsize of the tick labels
+plt.rc('ytick', labelsize=SMALL_SIZE)    # fontsize of the tick labels# def site_type():
 def get_cutoffs():
 	cutoff={}
 	cutoff['CA0100R']=['TSI_3022A_WHI',7e-9]
@@ -315,19 +318,22 @@ def scatter_plot_fig8(annual_data):
 	R2= pearsonr(annual_data['obs'],annual_data['oldsoa-bhn'])
 
 	f_sc,ax_sc=plt.subplots(1,figsize=(6,6))
-	ax_sc.plot(annual_data['obs'],annual_data['newsoa-ri'],'or')
-	ax_sc.loglog(annual_data['obs'],annual_data['oldsoa-bhn'],'xb')
-	ax_sc.annotate(('NEWSOA: %6.2f')%R1[0],xy=(.01,0.9),xycoords='axes fraction')
-	ax_sc.annotate(('OLDSOA: %6.2f')%R2[0],xy=(.01,0.85),xycoords='axes fraction')
+	ax_sc.plot(annual_data['obs'],annual_data['newsoa-ri'],'or',label='NEWSOA')
+	ax_sc.loglog(annual_data['obs'],annual_data['oldsoa-bhn'],'xb',label='OLDSOA')
+	ax_sc.annotate(('NEWSOA: %6.2f')%R1[0],xy=(.01,0.9),xycoords='axes fraction',fontsize=14)
+	ax_sc.annotate(('OLDSOA: %6.2f')%R2[0],xy=(.01,0.85),xycoords='axes fraction',fontsize=14)
 	ax_sc.plot([0,10000],[0,10000],'-k')
 	ax_sc.plot([0,5000],[0,10000],'--g')
 	ax_sc.plot([0,10000],[0,5000],'--g')
-	ax_sc.set_xlabel('Observed number concentration [cm-3]')
-	ax_sc.set_ylabel('Modelled number concentration [cm-3]')
+	ax_sc.set_xlabel('Observed number concentration [cm-3]',fontsize=16)
+	ax_sc.set_ylabel('Modelled number concentration [cm-3]',fontsize=16)
 	ax_sc.set_xlim(5e1,1e4)
 	ax_sc.set_ylim(5e1,1e4)
 	ax_sc.set_aspect('equal', 'box')
+	ax_sc.legend(loc='lower right')
+	plt.tight_layout()
 	f_sc.savefig(output_png_path+'article/fig8_scatter_CN.png',dpi=pngdpi)
+	f_sc.savefig(output_pdf_path+'article/fig8_scatter_CN.pdf',dpi=pngdpi)
 def main():
 	observed_data=cnRead()
 	#list_stations(observed_data)

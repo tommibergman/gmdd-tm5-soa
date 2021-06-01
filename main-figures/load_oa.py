@@ -67,7 +67,7 @@ def annual_diff_plot(load,newname,oldname,fractional=True,bounds_load=[-3,-2.5,-
 		#ax2.set_title('Annual mean fractional change of OA burden.')
 		image=m.pcolormesh(lons,lats,np.squeeze(np.mean(load[newname][:,:,:],0)-np.mean(load[oldname][:,:,:],0))/np.mean(load[oldname][:,:,:],0)*100.0,norm=normpct,cmap=mycmap,latlon=True)
 		cb = m.colorbar(image,"bottom", size="5%", pad="2%",extend='both',ticks=bounds_pct)
-		cb.set_label(label_prefix+'('+EXP_NAMEs[0]+'-'+EXP_NAMEs[1]+')/'+EXP_NAMEs[1]+' [%]')
+		cb.set_label(label_prefix+'('+EXP_NAMEs[0]+'-'+EXP_NAMEs[1]+')/'+EXP_NAMEs[1]+' [%]',fontsize=12)
 		#cb.set_ticks()
 	else:
 		#ax2.set_title('Annual mean absolute change of OA burden')
@@ -172,11 +172,13 @@ m.drawmeridians(np.arange(-180.,180.,60.))
 m.drawcoastlines()
 #cb = plt.colorbar(image,"bottom", ticks=bounds_load,size="5%", pad="2%",ax=ax3[1])
 cb = m.colorbar(image, "bottom",ticks=bounds_load, size="5%", pad="2%",ax=ax3[1])
-cb.set_label('Change in OA mass on the surface (NEWSOA-OLDSOA)/OLDSOA[%]]')
+cb.set_label('Change in OA mass on the surface (NEWSOA-OLDSOA)/OLDSOA[%]',fontsize=12)
 #ax3[1].set_title('Fractional change in annual mean organic aerosol concentration at the surface \n (NEWSOA-OLDSOA)/OLDSOA [%]',fontsize=18)
 ax3[0].annotate('a)',xy=(0.05,0.95),xycoords='axes fraction',fontsize=18)
 ax3[1].annotate('b)',xy=(0.05,0.95),xycoords='axes fraction',fontsize=18)
+plt.tight_layout()
 f3.savefig(output_png_path+'/article/fig12_annual_2-panel-frac-load-conc-map_total_oa_NEWSOA-OLDSOA.png',dpi=600)
+f3.savefig(output_pdf_path+'/article/fig12_annual_2-panel-frac-load-conc-map_total_oa_NEWSOA-OLDSOA.pdf',dpi=600)
 
 
 f3,ax3=seasonal_plot(load,EXPS[0],EXPS[1],True,[-3,-2,-1,-0.75,-0.5,-0.25,-0.1,0.1,0.25,0.5,0.75,1,2,3],EXP_NAMEs[0],EXP_NAMEs[1])
@@ -186,6 +188,7 @@ f3,ax3=plt.subplots(1)
 annual_diff_plot(loadsoa,EXPS[0],EXPS[1],True,[-2,-1.5,-1,-0.5,-0.25,-0.1,0.1,0.25,0.5,1,1.5,2],ax3,'Burden of SOA ')
 #ax3.set_title('Annual mean fractional change in burden of SOA.')
 f3.savefig(output_png_path+'/article/fig5_annual_map_frac_load_soa_NEWSOA-OLDSOA.png',dpi=600)
+f3.savefig(output_pdf_path+'/article/fig5_annual_map_frac_load_soa_NEWSOA-OLDSOA.pdf',dpi=600)
 
 
 

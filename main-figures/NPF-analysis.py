@@ -39,7 +39,7 @@ for i,exp in enumerate(EXPS):
 
 	mapit_boundary(data[exp].d_nuc.mean(dim='time').sel(lev=slice(1,10)).sum(dim='lev'),[0.0,1e-4,0.001,0.01,0.1,0.5,1,2.5,5,10,15],ax[0,i],False,cblabel='Particle formation [cm$^{-3}$ s$^{-1}$]')
 	ax[0,i].set_title(EXPnames[i])
-	ax[0,i].annotate(('%s)')%(letters[0][i]),xy=(0.0,1.0),xycoords='axes fraction',fontsize=16)
+	ax[0,i].annotate(('%s)')%(letters[0][i]),xy=(0.0,1.0),xycoords='axes fraction',fontsize=24)
 	#f.savefig(pngpath+'/production/OLDSOA_annual_production_SOA.png',dpi=400)
 #for i in EXPS:
 	#f,ax=plt.subplots(1)	
@@ -49,10 +49,12 @@ for i,exp in enumerate(EXPS):
 	N=(data[exp].N_NUS.mean(dim='time').sel(lev=1)*1e-6)
 	#mapit_boundary(N,[10,50,100,250,500,750,1000,2500,5000,7500,10000,25000,50000],ax[1,i],False,cblabel='Nucleation mode \nnumber concentration [cm$^{-3}$]')
 	mapit_boundary(N,[0.1,1,10,100,500,1000,5000,10000],ax[1,i],False,cblabel='Nucleation mode \nnumber concentration [cm$^{-3}$]')
-	ax[1,i].annotate(('%s)')%(letters[1][i]),xy=(0.0,1.0),xycoords='axes fraction',fontsize=16)
+	ax[1,i].annotate(('%s)')%(letters[1][i]),xy=(0.0,1.0),xycoords='axes fraction',fontsize=24)
 	#ax.set_title('Annual production of OLDSOA in [g]')
 	#f.savefig(pngpath+'/production/OLDSOA_annual_production_SOA.png',dpi=400)
+plt.tight_layout()
 f.savefig(output_png_path+'/article/fig7_npf-nnus-2x2.png',dpi=600)
+f.savefig(output_pdf_path+'/article/fig7_npf-nnus-2x2.pdf',dpi=600)
 
 # fzon,azon=plt.subplots(ncols=3,figsize=(18,6))
 

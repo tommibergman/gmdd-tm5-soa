@@ -13,6 +13,9 @@ from scipy.stats import pearsonr
 import numpy as np
 from settings import *
 
+SMALL_SIZE=12
+plt.rc('xtick', labelsize=SMALL_SIZE)    # fontsize of the tick labels
+plt.rc('ytick', labelsize=SMALL_SIZE)    # fontsize of the tick labels# def site_type():
 
 def list_stations(indict):
 	tabletex=open(paper+'sitelist_emep.tex','w')
@@ -727,17 +730,17 @@ def main():
 		amean[0,n].plot(np.linspace(1,12,12), np.nanmean(meanmodelmonpom_pm25[exp],axis=0),ls='--',color=colors[n],label=labeli+' POA')
 
 		amean[0,n].set_ylim([0,8.5])
-		amean[0,n].legend(loc=1)
+		amean[0,n].legend(loc='upper right',fontsize=12)
 		nmbmean=NMB(np.nanmean(meanmodelmon_pm25['obs'],axis=0),np.nanmean(meanmodelmon_pm25[exp],axis=0))
 		mbmean=MB(np.nanmean(meanmodelmon_pm25['obs'],axis=0),np.nanmean(meanmodelmon_pm25[exp],axis=0))
 		rmean=pearsonr(np.nanmean(meanmodelmon_pm25[exp],axis=0),np.nanmean(meanmodelmon_pm25['obs'],axis=0))
-		amean[0,n].annotate(('NMB (MB): %6.1f %% (%5.2f)')%(nmbmean*100,mbmean),xy=(0.05,0.9),xycoords='axes fraction',fontsize=10)
-		amean[0,n].annotate(('R: %6.2f,%6.2e')%(rmean[0],rmean[1]),xy=(0.05,0.85),xycoords='axes fraction',fontsize=10)
+		amean[0,n].annotate(('NMB (MB): %6.1f %% (%5.2f)')%(nmbmean*100,mbmean),xy=(0.01,0.9),xycoords='axes fraction',fontsize=12)
+		amean[0,n].annotate(('R: %6.2f,%6.2e')%(rmean[0],rmean[1]),xy=(0.01,0.82),xycoords='axes fraction',fontsize=12)
 		amean[0,n].set_xticks([1,2,3,4,5,6,7,8,9,10,11,12])
 		amean[0,n].set_xticklabels(str_months())
-		amean[0,n].annotate(('%s)')%(letters[0][n]),xy=(0.0,1.02),xycoords='axes fraction',fontsize=16)
-		amean[0,n].set_xlabel('Month')
-		amean[0,n].set_ylabel('OM in PM2.5 [ug m-3]')
+		amean[0,n].annotate(('%s)')%(letters[0][n]),xy=(0.0,1.02),xycoords='axes fraction',fontsize=18)
+		amean[0,n].set_xlabel('Month',fontsize=12)
+		amean[0,n].set_ylabel('OM in PM2.5 [ug m-3]',fontsize=12)
 		#middle row
 		std=np.nanstd(meanmodelmon[exp],axis=0)
 		maxi=np.nanmax(meanmodelmon[exp],axis=0)
@@ -749,22 +752,22 @@ def main():
 		amean[1,n].plot(np.linspace(1,12,12), np.nanmean(meanmodelmonpom_pm10[exp],axis=0),ls='--',color=colors[n],label=labeli+' POA')
 
 		amean[1,n].set_ylim([0,8.5])
-		amean[1,n].legend(loc=1)
+		amean[1,n].legend(loc='upper right',fontsize=12)
 		nmbmean=NMB(np.nanmean(meanmodelmon_pm10['obs'],axis=0),np.nanmean(meanmodelmon_pm10[exp],axis=0))
 		mbmean=MB(np.nanmean(meanmodelmon_pm10['obs'],axis=0),np.nanmean(meanmodelmon_pm10[exp],axis=0))
 		rmean=pearsonr(np.nanmean(meanmodelmon_pm10[exp],axis=0),np.nanmean(meanmodelmon_pm10['obs'],axis=0))
-		amean[1,n].annotate(('NMB (MB): %6.1f %% (%5.2f)')%(nmbmean*100,mbmean),xy=(0.05,0.9),xycoords='axes fraction',fontsize=10)
-		amean[1,n].annotate(('R: %6.2f,%6.2e')%(rmean[0],rmean[1]),xy=(0.05,0.85),xycoords='axes fraction',fontsize=10)
+		amean[1,n].annotate(('NMB (MB): %6.1f %% (%5.2f)')%(nmbmean*100,mbmean),xy=(0.01,0.9),xycoords='axes fraction',fontsize=12)
+		amean[1,n].annotate(('R: %6.2f,%6.2e')%(rmean[0],rmean[1]),xy=(0.01,0.82),xycoords='axes fraction',fontsize=12)
 		amean[1,n].set_xticks([1,2,3,4,5,6,7,8,9,10,11,12])
 		amean[1,n].set_xticklabels(str_months())
-		amean[1,n].annotate(('%s)')%(letters[1][n]),xy=(0.0,1.02),xycoords='axes fraction',fontsize=16)
-		amean[1,n].set_xlabel('Month')
-		amean[1,n].set_ylabel('OM in PM10 [ug m-3]')
+		amean[1,n].annotate(('%s)')%(letters[1][n]),xy=(0.0,1.02),xycoords='axes fraction',fontsize=18)
+		amean[1,n].set_xlabel('Month',fontsize=12)
+		amean[1,n].set_ylabel('OM in PM10 [ug m-3]',fontsize=12)
 		#print np.nanmean(meanmodelmon[exp],axis=0)
 		# bottom
 		d1=amean[2,n].scatter(yearmean_pm10_obs,yearmean_pm10_model[exp],marker='+',color=colors[n],s=25,label='PM10')
 		d2=amean[2,n].scatter(yearmean_pm25_obs,yearmean_pm25_model[exp],marker='d',color=colors[n],s=25,label='PM25')
-		amean[2,n].legend(loc=3)
+		amean[2,n].legend(loc=3,fontsize=12)
 		amean[2,n].loglog([0.001,1000],[0.001,1000],'k-')
 		amean[2,n].loglog([0.1,1000],[0.01,100],'k--')
 		amean[2,n].loglog([0.01,100],[0.1,1000],'k--')
@@ -781,23 +784,24 @@ def main():
 		RMSEemep_pm10=RMSE(yearmean_pm10_obs,yearmean_pm10_model[exp])
 		#amean[1,n].annotate(('MFB: %6.2f')%MFBemep1,xy=(.01,0.9),xycoords='axes fraction')
 		#amean[1,n].annotate(('MFE: %6.2f')%MFEemep1,xy=(.01,0.85),xycoords='axes fraction')
-		amean[2,n].annotate(('NMB: %7.1f %%')%(NMBemep_pm25*100),xy=(.01,0.95),xycoords='axes fraction')
+		amean[2,n].annotate(('NMB: %7.1f %%')%(NMBemep_pm25*100),xy=(.01,0.93),xycoords='axes fraction',fontsize=12)
 		#amean[1,n].annotate(('NME: %6.2f')%NMEemep1,xy=(.01,0.75),xycoords='axes fraction')
-		amean[2,n].annotate(('RMSE: %6.2f')%RMSEemep_pm25,xy=(.01,0.9),xycoords='axes fraction')
-		amean[2,n].annotate(('NMB: %7.1f %%')%(NMBemep_pm10*100),xy=(.01,0.85),xycoords='axes fraction')
+		amean[2,n].annotate(('RMSE: %6.2f')%RMSEemep_pm25,xy=(.01,0.86),xycoords='axes fraction',fontsize=12)
+		amean[2,n].annotate(('NMB: %7.1f %%')%(NMBemep_pm10*100),xy=(.01,0.79),xycoords='axes fraction',fontsize=12)
 		#amean[1,n].annotate(('NME: %6.2f')%NMEemep1,xy=(.01,0.75),xycoords='axes fraction')
-		amean[2,n].annotate(('RMSE: %6.2f')%RMSEemep_pm10,xy=(.01,0.80),xycoords='axes fraction')
-		amean[2,n].set_xlabel('EMEP OM [ug m-3]')
-		amean[2,n].set_ylabel(EXP_NAMEs[n]+' OM [ug m-3]')
+		amean[2,n].annotate(('RMSE: %6.2f')%RMSEemep_pm10,xy=(.01,0.72),xycoords='axes fraction',fontsize=12)
+		amean[2,n].set_xlabel('EMEP OM [ug m-3]',fontsize=12)
+		amean[2,n].set_ylabel(EXP_NAMEs[n]+' OM [ug m-3]',fontsize=12)
 		amean[2,n].set_aspect('equal')
-		amean[2,n].annotate(('%s)')%(letters[2][n]),xy=(0.0,1.02),xycoords='axes fraction',fontsize=16)
+		amean[2,n].annotate(('%s)')%(letters[2][n]),xy=(0.0,1.02),xycoords='axes fraction',fontsize=18)
 	
 	std=np.nanstd(meanmodelmon['obs'],axis=0)
 	maxi=np.nanmax(meanmodelmon['obs'],axis=0)
 	mini=np.nanmin(meanmodelmon['obs'],axis=0)
-	fmean.suptitle('EMEP')
-	fmean.savefig(output_png_path+'article/fig11_monthly-EMEP-allmean_6panels.png',dpi=400)
-	fmean.savefig(output_pdf_path+'article/fig11_monthly-EMEP-allmean_6panels.pdf',dpi=400)
+	plt.tight_layout()
+	#fmean.suptitle('EMEP')
+	fmean.savefig(output_png_path+'article/fig11_monthly-EMEP-allmean_6panels.png',dpi=600)
+	fmean.savefig(output_pdf_path+'article/fig11_monthly-EMEP-allmean_6panels.pdf',dpi=600)
 
 	
 	print np.nanmean(yearmean_pm10_obs)
