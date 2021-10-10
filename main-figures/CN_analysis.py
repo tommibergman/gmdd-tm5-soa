@@ -1,5 +1,6 @@
 from scipy.special import erf
 import matplotlib.pyplot as plt 
+import matplotlib.animation as animation
 import nappy
 import datetime
 import glob
@@ -153,7 +154,7 @@ def colocate_time(gpdata,timeaxis,stime,etime,obsdata,errorvalue=999999):
 
 		else:
 			print 'ERROR:  no data points found in modeldata, '
-			print obsstep,modelstep
+			#print obsstep,modelstep
 			continue	
 		model1_mean.append(model_mean)
 		model1_std.append(model_std)
@@ -270,9 +271,12 @@ def read_collocate_modeldata(observed_data):
 	cutoffs=get_cutoffs()
 
 	modeldata={}
+	modeldata_low={}
 	data_monthly={}
+	data_low={}
 	for experiment in EXPS:
 		model={}
+		model_low={}
 		#test2,timeax=read_N(basepathraw+exp+'/general_TM5_'+exp+'_2010.lev1.nc')
 		Number_modes,radii_modes,timeax=read_N_R(basepathraw+experiment+'/general_TM5_'+experiment+'_2010.lev1.nc')
 		for isite in observed_data:
@@ -284,23 +288,47 @@ def read_collocate_modeldata(observed_data):
 			sitecutoff=5 #radius -> Dp=10nm
 			#each site at a time
 			CN_site_data=np.zeros_like(timeax)
-			for N_mode in Number_modes:
+			print CN_site_data.shape
+			N_site_data=np.zeros((7,len(observed_data[isite]['CN'])))
+			R_site_data=np.zeros((7,len(observed_data[isite]['CN'])))
+
+			for ii,N_mode in enumerate(Number_modes):
 				gridpoint_Nmode_data,lat,lon=emep_read.select_gp(Number_modes[N_mode],observed_data[isite]['lat'],observed_data[isite]['lon'])
 				radius_mode_varname='RWET_'+N_mode[-3:]
 				gridpoint_R_data,lat,lon=emep_read.select_gp(radii_modes[radius_mode_varname],observed_data[isite]['lat'],observed_data[isite]['lon'])
 				modal_fraction= modal_frac(sitecutoff,gridpoint_R_data,radius_mode_varname[-3:])
 				CN_site_data[:]+=gridpoint_Nmode_data*modal_fraction
+				RR,std,col_time=colocate_time(gridpoint_R_data[:],timeax,observed_data[isite]['starttime'],observed_data[isite]['endtime'],observed_data[isite]['CN'])
+				NN,std,col_time=colocate_time(gridpoint_Nmode_data[:],timeax,observed_data[isite]['starttime'],observed_data[isite]['endtime'],observed_data[isite]['CN'])
+				print gridpoint_R_data.shape 
+				print R_site_data.shape
+				print len(RR)
+				print len(observed_data[isite]['CN'])
 				
+				R_site_data[ii,:]=RR[:] #gridpoint_R_data[:]
+				N_site_data[ii,:]=NN[:] #gridpoint_Nmode_data[:]
+				R_site_data[ii,:]=gridpoint_R_data[:]*1e-6
+				N_site_data[ii,:]=gridpoint_Nmode_data[:]*1e-6
 			#m1m,m1s,t1=colocate_time(gpdata,timeax,observed_data[isite]['starttime'],observed_data[isite]['endtime'],observed_data[isite]['CN'])
 			CN,std,col_time=colocate_time(CN_site_data,timeax,observed_data[isite]['starttime'],observed_data[isite]['endtime'],observed_data[isite]['CN'])
 			modeldata_site={'CN':CN,'std':std,'time':col_time,'lon':lon,'lat':lat}
 			model[isite]=modeldata_site
+			if isite=='DE0060G' or isite=='US6004G':
+				print isite
+				print gridpoint_Nmode_data
+				print gridpoint_R_data
+				print R_site_data.mean(axis=1)
+				print N_site_data.mean(axis=1)
+				model_low[isite]=[R_site_data,N_site_data]
+
 		modeldata[experiment]=model
+		modeldata_low[experiment]=model_low
 
 
 		data_monthly[experiment]=monthly_aggregation(modeldata[experiment])
 	data_monthly['obs']=monthly_aggregation(observed_data)
-	return modeldata
+	
+	return modeldata,modeldata_low
 def	annual_aggregate(modeldata,observed_data):
 	annual_data={}
 	for i in EXPS:
@@ -332,16 +360,82 @@ def scatter_plot_fig8(annual_data):
 	ax_sc.set_aspect('equal', 'box')
 	ax_sc.legend(loc='lower right')
 	plt.tight_layout()
-	f_sc.savefig(output_png_path+'article/fig8_scatter_CN.png',dpi=pngdpi)
-	f_sc.savefig(output_pdf_path+'article/fig8_scatter_CN.pdf',dpi=pngdpi)
+	#f_sc.savefig(output_png_path+'article/fig8_scatter_CN.png',dpi=pngdpi)
+	#f_sc.savefig(output_pdf_path+'article/fig8_scatter_CN.pdf',dpi=pngdpi)
+def find_higher_station(model_data):
+	#print model_data
+	exps=model_data.keys()
+	over=[]
+	under=[]
+	for site in model_data[exps[0]]:
+		np.nanmean(model_data[exps[0]][site]['CN'])
+		print site 
+		if np.nanmean(model_data[exps[0]][site]['CN'])>np.nanmean(model_data[exps[1]][site]['CN']):
+			print 'over',site
+			over.append(site)
+		else:
+			under.append(site)
+	
+	return over,under
+def discretize_m7(R,N):
+	lnr=np.linspace(-50,10,600)
+	#print max(len(N)),max(len(lnr))
+	print (np.shape(N)),(np.shape(lnr))
+	pns=np.zeros((np.max(np.shape(N)),np.max(np.shape(lnr))))
+	pks=np.zeros((np.max(np.shape(N)),np.max(np.shape(lnr))))
+	pas=np.zeros((np.max(np.shape(N)),np.max(np.shape(lnr))))
+	pcs=np.zeros((np.max(np.shape(N)),np.max(np.shape(lnr))))
+	pki=np.zeros((np.max(np.shape(N)),np.max(np.shape(lnr))))
+	pai=np.zeros((np.max(np.shape(N)),np.max(np.shape(lnr))))
+	pci=np.zeros((np.max(np.shape(N)),np.max(np.shape(lnr))))
+	print np.shape(pns)
+	for i in range(len(N[0,:])):
+		#print lnr-np.log(R[0,i])
+		pns[i,:]=(N[0,i]/(np.sqrt(2*np.pi)*np.log(1.59)))*np.exp(-((lnr-np.log(R[0,i]))**2)/(2*(np.log(1.59))**2))
+		pks[i,:]=(N[1,i]/(np.sqrt(2*np.pi)*np.log(1.59)))*np.exp(-((lnr-np.log(R[1,i]))**2)/(2*(np.log(1.59))**2))
+		pas[i,:]=(N[2,i]/(np.sqrt(2*np.pi)*np.log(1.59)))*np.exp(-((lnr-np.log(R[2,i]))**2)/(2*(np.log(1.59))**2))
+		pcs[i,:]=(N[3,i]/(np.sqrt(2*np.pi)*np.log(2.00)))*np.exp(-((lnr-np.log(R[3,i]))**2)/(2*(np.log(2.00))**2))
+		pki[i,:]=(N[4,i]/(np.sqrt(2*np.pi)*np.log(1.59)))*np.exp(-((lnr-np.log(R[4,i]))**2)/(2*(np.log(1.59))**2))
+		pai[i,:]=(N[5,i]/(np.sqrt(2*np.pi)*np.log(1.59)))*np.exp(-((lnr-np.log(R[5,i]))**2)/(2*(np.log(1.59))**2))
+		pci[i,:]=(N[6,i]/(np.sqrt(2*np.pi)*np.log(2.00)))*np.exp(-((lnr-np.log(R[6,i]))**2)/(2*(np.log(2.00))**2))
+	data_s=pns+pks+pas+pcs;
+	data_i=pki+pai+pci;
+	return data_i,data_s,lnr
+def animate(i):
+	line,=d
 def main():
 	observed_data=cnRead()
 	#list_stations(observed_data)
 
 
-	modeldata=read_collocate_modeldata(observed_data)
+	modeldata,lowdata=read_collocate_modeldata(observed_data)
 	annual_data=annual_aggregate(modeldata,observed_data)
+	#annual_data_low=annual_aggregate(lowdata,observed_data)
 
+	f,a=plt.subplots(2)
+	for ii,i in enumerate(EXPs[0:-1]):
+		for k,j in enumerate(lowdata[i]):
+			print i,j, np.mean(lowdata[i][j][0][:,:],axis=1)
+			print i,j, np.mean(lowdata[i][j][1][:,:],axis=1)
+			data_i,data_s,lnr=discretize_m7(lowdata[i][j][0][:,:],lowdata[i][j][1][:,:])
+			print data_i
+			a[k].loglog(2*np.exp(lnr),np.nanmean(data_s[:,:]+data_i[:,:],0),label=EXP_NAMEs[ii])
+			a[k].set_xlim([1e-9, 1e-5])
+			a[k].set_ylim([1e-2, 1e2])
+			a[k].set_xlabel('$D_p$')
+			a[k].set_ylabel('dN/dlog $D_p$')
+			a[k].plot([1e-8, 1e-8],[1e-2, 1e2],color='k')
+			a[k].set_title(observed_data[j]['name'])
+			a[k].legend()
+	plt.show()
+	over,under=find_higher_station(modeldata)
+	print observed_data
+	print 'over: '
+	for iover in over:
+		print observed_data[iover]['name']
+	print 'under: '
+	for iunder in under:
+		print observed_data[iunder]['name']
 	increase_count = np.count_nonzero((annual_data['newsoa-ri']>annual_data['oldsoa-bhn']))
 	decrease_count = np.count_nonzero((annual_data['newsoa-ri']<annual_data['oldsoa-bhn']))
 

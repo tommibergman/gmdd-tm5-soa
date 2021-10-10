@@ -4,7 +4,6 @@ import netCDF4 as nc
 from mpl_toolkits.basemap import Basemap
 import matplotlib as mpl
 import sys
-from colocate_aeronet import do_colocate
 from general_toolbox import lonlat,get_gb_xr,monthlengths
 from pylab import *
 import xarray as xr

@@ -16,7 +16,7 @@ def read_aatsr(var='od550aer'):
 	
 	model=basepathprocessed+'CCI/col_ESACCI_SU_TM5.2010.ym.nc'
 	#model2=basepathprocessed+'output/Aggregated_lin_Col_TM5_'+EXPs[0]+'_MYD04_MOD04_L2_2010_1x1_yearmean.nc'
-	AATSR=basepathprocessed+'CCI/ESACCI-L2P_AEROSOL-AER_PRODUCTS-AATSR_ENVISAT-SU_aggregated.2010.yearmean.nc'
+	#AATSR=basepathprocessed+'CCI/ESACCI-L2P_AEROSOL-AER_PRODUCTS-AATSR_ENVISAT-SU_aggregated.2010.yearmean.nc'
 
 	#model=basepathprocessed+'CCI/col_ESACCI_SU_TM5_'+exp+'.2010.mm.nc'
 	model=raw_store+'CCI/cci_tm5_col/col_ESACCI_SU_TM5_'+EXPs[0]+'_2010.yearmean.nc'
@@ -63,8 +63,8 @@ def plot_aatsr_diff(AATSRdata,modeldata,AATSRlon,AATSRlat):
 		c = plt.colorbar(cs,orientation='horizontal',ticks=bounds,aspect=30,pad=0.05,shrink=0.9)
 		c.set_label('AOD bias ['+EXP_NAMEs[i]+'-AATSR]',fontsize=24)
 		c.ax.tick_params(labelsize=12)
-		f.savefig(output_pdf_path+'article/AOD-diff_'+EXP_NAMEs[i]+'-AATSR_2010.pdf')
-		f.savefig(output_png_path+'aatsr/AOD-diff_'+EXP_NAMEs[i]+'-AATSR_2010.png',dpi=600)
+		#f.savefig(output_pdf_path+'article/AOD-diff_'+EXP_NAMEs[i]+'-AATSR_2010.pdf')
+		#f.savefig(output_png_path+'aatsr/AOD-diff_'+EXP_NAMEs[i]+'-AATSR_2010.png',dpi=600)
 
 		
 		fsoa,ax=plt.subplots(figsize=(10,7))
@@ -89,8 +89,8 @@ def plot_aatsr_diff(AATSRdata,modeldata,AATSRlon,AATSRlat):
 		c.set_label('AOD ['+EXP_NAMEs[i]+']',fontsize=24)
 		c.ax.tick_params(labelsize=12)
 		#c.set_label('AOD relative bias [(TM5-AERONET)/AERONET]')
-		fsoa.savefig(output_pdf_path+'aatsr/TM5-'+EXP_NAMEs[i]+'_2010.pdf')
-		fsoa.savefig(output_png_path+'aatsr/TM5-'+EXP_NAMEs[i]+'_2010.png',dpi=600)
+		#fsoa.savefig(output_pdf_path+'aatsr/TM5-'+EXP_NAMEs[i]+'_2010.pdf')
+		#fsoa.savefig(output_png_path+'aatsr/TM5-'+EXP_NAMEs[i]+'_2010.png',dpi=600)
 	
 	fAATSR,ax=plt.subplots(figsize=(10,7))
 	m = Basemap(projection='robin',lon_0=0)
@@ -114,8 +114,8 @@ def plot_aatsr_diff(AATSRdata,modeldata,AATSRlon,AATSRlat):
 	c.set_label('AOD [AATSR]',fontsize=24)
 	c.ax.tick_params(labelsize=12)
 	#c.set_label('AOD relative bias [(TM5-AERONET)/AERONET]')
-	fAATSR.savefig(output_pdf_path+'aatsr/AATSR_2010.pdf')
-	fAATSR.savefig(output_png_path+'aatsr/AATSR_2010.png',dpi=600)
+	#fAATSR.savefig(output_pdf_path+'aatsr/AATSR_2010.pdf')
+	#fAATSR.savefig(output_png_path+'aatsr/AATSR_2010.png',dpi=600)
 def read_modis(landsea_print=False):
 	
 	cellarea_file=fixeddata+'/ec-ei-an0tr6-sfc-glb100x100-0000-oro.nc'
@@ -200,8 +200,8 @@ def plot_modis_diff(modisdata,modeldata,modislon,modislat):
 		c = plt.colorbar(cs,orientation='horizontal',ticks=bounds,aspect=30,pad=0.05,shrink=0.9)
 		c.set_label('AOD [TM5]',fontsize=24)
 		c.ax.tick_params(labelsize=12)
-		fsoa.savefig(output_pdf_path+'MODIS/TM5-'+EXP_NAMEs[i]+'_2010.pdf')
-		fsoa.savefig(output_png_path+'MODIS/TM5-'+EXP_NAMEs[i]+'_2010.png',dpi=600)
+		#fsoa.savefig(output_pdf_path+'MODIS/TM5-'+EXP_NAMEs[i]+'_2010.pdf')
+		#fsoa.savefig(output_png_path+'MODIS/TM5-'+EXP_NAMEs[i]+'_2010.png',dpi=600)
 		
 	fmodis,ax=plt.subplots(figsize=(10,7))
 	m = Basemap(projection='robin',lon_0=0)
@@ -222,8 +222,8 @@ def plot_modis_diff(modisdata,modeldata,modislon,modislat):
 	c = plt.colorbar(cs,orientation='horizontal',ticks=bounds,aspect=30,pad=0.05,shrink=0.8)
 	c.set_label('AOD [MODIS]',fontsize=24)
 	c.ax.tick_params(labelsize=12)
-	fmodis.savefig(output_pdf_path+'MODIS/MODIS_2010.pdf')
-	fmodis.savefig(output_png_path+'MODIS/MODIS_2010.png',dpi=600)
+	#fmodis.savefig(output_pdf_path+'MODIS/MODIS_2010.pdf')
+	#fmodis.savefig(output_png_path+'MODIS/MODIS_2010.png',dpi=600)
 def plot_both(data,bounds=[-0.375,-0.3,-0.225,-0.15,-0.075,-0.025,0.025,0.075,0.15,0.225,0.30,0.375]):
 	n=len(data)
 	if n<1:
@@ -256,14 +256,17 @@ def plot_both(data,bounds=[-0.375,-0.3,-0.225,-0.15,-0.075,-0.025,0.025,0.075,0.
 def main(all=False):
 	modisdata,modismodeldata,modislon,modislat=read_modis()
 	AATSRdata,aatsrmodeldata,aatsrlon,aatsrlat=read_aatsr()
-	f,a=plot_both([{"satdata":modismodeldata['oldsoa-bhn'],"modeldata":modismodeldata['newsoa-ri'],"lon":modislon,"lat":modislat,'name':'NEWSOA-OLDSOA'},{"satdata":aatsrmodeldata['oldsoa-bhn'],"modeldata":aatsrmodeldata['newsoa-ri'],"lon":aatsrlon,"lat":aatsrlat,'name':'NEWSOA-OLDSOA'}],[-0.0375,-0.03,-0.0225,-0.015,-0.0075,-0.0025,0.0025,0.0075,0.015,0.0225,0.030,0.0375])
+	fs13,as13=plot_both([{"satdata":modismodeldata['oldsoa-bhn'],"modeldata":modismodeldata['newsoa-ri'],"lon":modislon,"lat":modislat,'name':'NEWSOA-OLDSOA'},{"satdata":aatsrmodeldata['oldsoa-bhn'],"modeldata":aatsrmodeldata['newsoa-ri'],"lon":aatsrlon,"lat":aatsrlat,'name':'NEWSOA-OLDSOA'}],[-0.0375,-0.03,-0.0225,-0.015,-0.0075,-0.0025,0.0025,0.0075,0.015,0.0225,0.030,0.0375])
 	plt.tight_layout()
-	f.savefig(output_png_path+'article/fig13_bias-MODIS-AATSR-satellite_2010.png',dpi=600)
-	f.savefig(output_pdf_path+'article/fig13_bias-MODIS-AATSR-satellite_2010.pdf',dpi=600)
+	fs13.savefig(output_png_path+'article/figS13_revised_bias-MODIS-AATSR-satellite_2010.png',dpi=600)
+	fs13.savefig(output_pdf_path+'article/figS13_revised_bias-MODIS-AATSR-satellite_2010.pdf',dpi=600)
 	if all:
 		plot_aatsr_diff(AATSRdata,aatsrmodeldata,aatsrlon,aatsrlat)
 		plot_modis_diff(modisdata,modismodeldata,modislon,modislat)
-		plot_both([{"satdata":modisdata,"modeldata":modismodeldata['newsoa-ri'],"lon":modislon,"lat":modislat,'name':'MODIS'},{"satdata":AATSRdata,"modeldata":aatsrmodeldata['newsoa-ri'],"lon":aatsrlon,"lat":aatsrlat,'name':'AATSR'}])
+	f13,a13=plot_both([{"satdata":modisdata,"modeldata":modismodeldata['newsoa-ri'],"lon":modislon,"lat":modislat,'name':'MODIS'},{"satdata":AATSRdata,"modeldata":aatsrmodeldata['newsoa-ri'],"lon":aatsrlon,"lat":aatsrlat,'name':'AATSR'}])
+	f13.savefig(output_png_path+'article/fig13_revised_bias-MODIS-AATSR-satellite_2010.png',dpi=600)
+	f13.savefig(output_pdf_path+'article/fig13_revised_bias-MODIS-AATSR-satellite_2010.pdf',dpi=600)
+
 	plt.show()
 if __name__=='__main__':
 	main()

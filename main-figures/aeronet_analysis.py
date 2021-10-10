@@ -11,6 +11,7 @@ import matplotlib as mpl
 #import read_colocation_aeronet as ra
 import datetime
 import scipy.stats as stats
+import scipy
 import glob
 import subprocess
 #from bivariate_fit import bivariate_fit
@@ -235,9 +236,24 @@ def scatter_dot(obs,model,**kwargs):
 		label=kwargs['label']
 	else:
 		label=None
+	if 'o_sem':
+		o_sem=kwargs['o_sem']
+	else:
+		o_sem=None
+	if 'm_sem':
+		m_sem=kwargs['m_sem']
+	else:
+		m_sem=None
 	#print label
 	#print obs,model
-	ax.scatter(obs,model,c=col,s=msize, label=label)
+	mask = ~np.isnan(obs) & ~np.isnan(model)
+	#xerror=scipy.std(obs[mask])
+	#yerror= scipy.std(model[mask])
+	xerror=stats.sem(obs[mask])
+	yerror= stats.sem(model[mask])
+	
+	#ax.scatter(obs,model,c=col,s=msize, label=label)
+	ax.errorbar(obs,model,xerr=o_sem,yerr=m_sem,c=col, label=label,fmt='none',ls='none')
 	XX=np.max([np.max(obs),np.max(model)])
 	XX=1.0
 	ax.set_xlim(0.01,XX)
@@ -253,6 +269,7 @@ def scatter_dot(obs,model,**kwargs):
 	# mask out nans in obs and model for both arrays
 	mask = ~np.isnan(obs) & ~np.isnan(model)
 	slope,intercept,r,p,stderr=stats.linregress(obs[mask], model[mask])
+	#raw_input()
 	#print slope,intercept,r,p,stderr
 	xxx=np.logspace(-3,1,1000)
 	#l3,=plt.plot(xxx,YY(xxx),'-b',lw=4)
@@ -668,29 +685,58 @@ def do_aggregate(AODvariable = 'od550aer',input_data="" ,output="",period=1):
 def month_aggregation(indata):
 	jindex=0
 	monthly_data_sum=np.zeros((12))
+	monthly_data_sum_SH=np.zeros((12))
+	monthly_data_sum_NH=np.zeros((12))
 	monthly_data_std=np.zeros((12))
 	monthly_data=np.zeros((12,1000000))
+	monthly_data_SH=np.zeros((12,1000000))
+	monthly_data_NH=np.zeros((12,1000000))
 	monthly_data[:,:]=np.nan
+	monthly_data_SH[:,:]=np.nan
+	monthly_data_NH[:,:]=np.nan
 	monthly_numsites=np.zeros((12))
+	monthly_numsites_SH=np.zeros((12))
+	monthly_numsites_NH=np.zeros((12))
 	for i in indata:
 		monthly_mean_data=np.zeros((12))
+		monthly_mean_data_NH=np.zeros((12))
+		monthly_mean_data_SH=np.zeros((12))
 		for kk in range(12):
 			data=[]
+			data_NH=[]
+			data_SH=[]
 			for jj,itime in enumerate(indata[i][8][:]):
 				if itime.month==kk+1 and not np.ma.is_masked(indata[i][4][jj]):
 					data.append(indata[i][4][jj])
 					monthly_data[kk,jindex]=indata[i][4][jj]
+					if indata[i][1][0]>0:
+						data_NH.append(indata[i][4][jj])
+						monthly_data_NH[kk,jindex]=indata[i][4][jj]
+					else:		
+						data_SH.append(indata[i][4][jj])
+						monthly_data_SH[kk,jindex]=indata[i][4][jj]
+					
 					jindex+=1
 				else:
 					continue
 			monthly_mean_data[kk]=np.nanmean(np.array(data))
+			monthly_mean_data_NH[kk]=np.nanmean(np.array(data_NH))
+			monthly_mean_data_SH[kk]=np.nanmean(np.array(data_SH))
 			if not np.isnan(monthly_mean_data[kk]):
 				monthly_data_sum[kk]+=monthly_mean_data[kk]
 				monthly_numsites[kk]+=1
+			if not np.isnan(monthly_mean_data_NH[kk]):
+				monthly_data_sum_NH[kk]+=monthly_mean_data_NH[kk]
+				monthly_numsites_NH[kk]+=1
+			if not np.isnan(monthly_mean_data_SH[kk]):
+				monthly_data_sum_SH[kk]+=monthly_mean_data_SH[kk]
+				monthly_numsites_SH[kk]+=1
 	mean_monthly_data=monthly_data_sum/monthly_numsites
+	mean_monthly_data_NH=monthly_data_sum_NH/monthly_numsites_NH
+	mean_monthly_data_SH=monthly_data_sum_SH/monthly_numsites_SH
 	for i in range(12):
 		monthly_data_std[i]=np.nanstd(monthly_data[i,:])
-	return mean_monthly_data,monthly_numsites,monthly_data_std
+	return mean_monthly_data,monthly_numsites,monthly_data_std,mean_monthly_data_NH,mean_monthly_data_SH
 
 #if __name__="__main__":
 AODmodel = 'od550aer'
@@ -783,6 +829,9 @@ for index,reg in enumerate(colordict):
 	aero_concat=[]#np.empty(len(aeronet[reg]))
 	tm5old_concat=[]#np.empty(len(tm5old[reg]))
 	tm5new_concat=[]#np.empty(len(tm5new[reg]))
+	aero_concat_sem=[]#np.empty(len(aeronet[reg]))
+	tm5old_concat_sem=[]#np.empty(len(tm5old[reg]))
+	tm5new_concat_sem=[]#np.empty(len(tm5new[reg]))
 	
 	if len(aeronet_regions[reg])==0:
 			continue
@@ -796,11 +845,14 @@ for index,reg in enumerate(colordict):
 	x, y = m(lonmin,latmin)
 	ax_scat_comb[1,1].annotate(reg, xy=(x, y), xycoords='data', xytext=(x, y), textcoords='data',color='w',fontsize=14)
 	for i in aeronet_regions[reg]:
-		
 		if not np.ma.is_masked(aeronet_regions[reg][i][4]):
+			print 'test', i,aeronet_regions[reg][i][4],aeronet_regions[reg][i][6],aeronet_regions[reg][i][7],aeronet_regions[reg][i][6][:]/np.sqrt(aeronet_regions[reg][i][7][:])
 			aero_concat.append(aeronet_regions[reg][i][4])
 			tm5old_concat.append(tm5old_regions[reg][i][4])
 			tm5new_concat.append(tm5new_regions[reg][i][4])
+			aero_concat_sem.append(aeronet_regions[reg][i][6]/np.sqrt(aeronet_regions[reg][i][7]))
+			tm5old_concat_sem.append(tm5old_regions[reg][i][6][:]/np.sqrt(tm5old_regions[reg][i][7][:]))
+			tm5new_concat_sem.append(tm5new_regions[reg][i][6][:]/np.sqrt(tm5new_regions[reg][i][7][:]))
 		else: # everything is masked, do not add masked data
 			if debug:
 				print 'all data is masked, probably no data available for the current year' 
@@ -814,18 +866,24 @@ for index,reg in enumerate(colordict):
 
 	tm5old_concat=np.array(tm5old_concat)
 	tm5new_concat=np.array(tm5new_concat)
+
+	aero_concat_sem=np.array(aero_concat_sem)
+	tm5old_concat_sem=np.array(tm5old_concat_sem)
+	tm5new_concat_sem=np.array(tm5new_concat_sem)
 	
 	if len(aero_concat)==0:
 		continue
 	NMB_new=NMB(aero_concat,tm5new_concat)*100
 	NMB_old=NMB(aero_concat,tm5old_concat)*100
-	slope,interp,rnew,p,stderrnew=scatter_dot(aero_concat,tm5new_concat,col=colordict[reg],ax=ax_scat_comb[0,0],modelname='NEWSOA',label=reg,ms=10)
+	print stats.sem(aero_concat)
+	print stats.sem(tm5new_concat)
+	print stats.sem(tm5old_concat)
 
-	slope,interp,rold,p,stderrold=scatter_dot(aero_concat,tm5old_concat,col=colordict[reg],ax=ax_scat_comb[0,1],modelname='OLDSOA',label=reg,ms=10)
+	slope,interp,rnew,p,stderrnew=scatter_dot(aero_concat,tm5new_concat,col=colordict[reg],ax=ax_scat_comb[0,0],modelname='NEWSOA',label=reg,ms=10,o_sem=aero_concat_sem,m_sem=tm5new_concat_sem)
+
+	slope,interp,rold,p,stderrold=scatter_dot(aero_concat,tm5old_concat,col=colordict[reg],ax=ax_scat_comb[0,1],modelname='OLDSOA',label=reg,ms=10,o_sem=aero_concat_sem,m_sem=tm5old_concat_sem)
 	rmse_old=RMSE(aero_concat,tm5old_concat)
 	rmse_new=RMSE(aero_concat,tm5new_concat)
-
-
 	aeronet_table.write('%-6.6s\t%2d\t%6.3f\t%6.3f\t%6.3f\t%5.1f\t%5.1f\t%6.3f\t%6.3f\t%6.3f\t%6.3f\\\\ \n'%(reg,len(tm5old_concat),np.ma.mean(np.array(aero_concat)),np.ma.mean(np.array(tm5new_concat)),np.ma.mean(np.array(tm5old_concat)),NMB_new,NMB_old,rnew,rold,rmse_new,rmse_old))
 	aeronet_table_latex.write('%-6.6s&%2d&%6.3f&%6.3f&%6.3f&%5.1f&%5.1f&%6.3f&%6.3f&%6.3f&%6.3f\\\\ \n'%(reg,len(tm5old_concat),np.ma.mean(np.array(aero_concat) ),np.ma.mean(np.array(tm5new_concat)),np.ma.mean(np.array(tm5old_concat)),NMB_new,NMB_old,rnew,rold,rmse_new,rmse_old))
 if debug:
@@ -833,12 +891,18 @@ if debug:
 for i in aeronet_data_dict['yearly']:
 	px,py=m(aeronet_data_dict['yearly'][i][0],aeronet_data_dict['yearly'][i][1])
 	m.scatter(px,py,5,marker='o',color='w',edgecolor='k',linewidth=0.5,zorder=100)
-n_month,n_month_sites,astd=month_aggregation(aeronet_data_dict['all'])
-n_month_new,n_month_sites_old,nstd=month_aggregation(TM5NEWdatadict['all'])
-n_month_old,n_month_sites_new,ostd=month_aggregation(TM5OLDdatadict['all'])
-ax_scat_comb[1,0].plot(np.linspace(0,11,12),n_month,'k',label='AERONET')
-ax_scat_comb[1,0].plot(np.linspace(0,11,12),n_month_new,'r',label=EXP_NAMEs[0])
-ax_scat_comb[1,0].plot(np.linspace(0,11,12),n_month_old,'b',label=EXP_NAMEs[1])
+n_month,n_month_sites,astd,n_month_NH,n_month_SH=month_aggregation(aeronet_data_dict['all'])
+n_month_new,n_month_sites_new,nstd,n_month_new_NH,n_month_new_SH=month_aggregation(TM5NEWdatadict['all'])
+n_month_old,n_month_sites_old,ostd,n_month_old_NH,n_month_old_SH=month_aggregation(TM5OLDdatadict['all'])
+#ax_scat_comb[1,0].plot(np.linspace(0,11,12),n_month,'k',label='AERONET')
+#ax_scat_comb[1,0].plot(np.linspace(0,11,12),n_month_new,'r',label=EXP_NAMEs[0])
+#ax_scat_comb[1,0].plot(np.linspace(0,11,12),n_month_old,'b',label=EXP_NAMEs[1])
+ax_scat_comb[1,0].plot(np.linspace(0,11,12),n_month_NH,'-k',label='AERONET NH')
+ax_scat_comb[1,0].plot(np.linspace(0,11,12),n_month_new_NH,'-r',label=EXP_NAMEs[0]+' NH')
+ax_scat_comb[1,0].plot(np.linspace(0,11,12),n_month_old_NH,'-b',label=EXP_NAMEs[1]+' NH')
+ax_scat_comb[1,0].plot(np.linspace(0,11,12),n_month_SH,'--k',label='AERONET SH')
+ax_scat_comb[1,0].plot(np.linspace(0,11,12),n_month_new_SH,'--r',label=EXP_NAMEs[0]+' SH')
+ax_scat_comb[1,0].plot(np.linspace(0,11,12),n_month_old_SH,'--b',label=EXP_NAMEs[1]+' SH')
 ax_scat_comb[1,0].set_xticks(np.linspace(0,11,12))
 ax_scat_comb[1,0].set_xticklabels(str_months(),fontsize=16)
 ax_scat_comb[1,0].set_xlabel('Month',fontsize=24)
@@ -856,6 +920,8 @@ for site in aeronet_data_dict['yearly']:
 		aero_R.append(aeronet_data_dict['yearly'][site][4])
 		TM5n_R.append(TM5NEWdatadict['yearly'][site][4])
 		TM5o_R.append(TM5OLDdatadict['yearly'][site][4])
+
+
 ax_scat_comb[0,0].annotate('R : %5.2f '%(stats.pearsonr(np.array(TM5n_R),np.array(aero_R))[0]),xy=(0.05,0.95),xycoords='axes fraction',fontsize=14)
 ax_scat_comb[0,0].annotate('MB : %5.3f '%(np.mean(np.array(TM5n_R))-np.mean(np.array(aero_R))),xy=(0.05,0.90),xycoords='axes fraction',fontsize=14)
 ax_scat_comb[0,1].annotate('R : %5.2f '%(stats.pearsonr(np.array(TM5o_R),np.array(aero_R))[0]),xy=(0.05,0.95),xycoords='axes fraction',fontsize=14)
@@ -868,8 +934,9 @@ for i in range(2):
 		else:
 			ax_scat_comb[i,j].annotate(string.ascii_lowercase[k]+')',xy=(0.01,1.01),xycoords='axes fraction',fontsize=20)
 		k+=1
-f_scat_comb.savefig(output_png_path+'article/fig14_scatter_categorized_log_seasonal_map.png',dpi=600)
-f_scat_comb.savefig(output_pdf_path+'/article/fig14_scatter_categorized_log_seasonal_map.pdf')
+f_scat_comb.savefig(output_png_path+'article/fig14_revised_scatter_categorized_log_seasonal_map_hemispheric.png',dpi=600)
+f_scat_comb.savefig(output_pdf_path+'article/fig14_revised_scatter_categorized_log_seasonal_map_hemispheric.pdf')
+f_scat_comb.savefig('test-fig14_scatter_categorized_log_seasonal_map.pdf')
 
 TM5n2=concatenate_sites2(TM5NEWdatadict['daily'])
 TM5o2=concatenate_sites2(TM5OLDdatadict['daily'])
@@ -911,6 +978,7 @@ slope,intercept,rold,p,stderr=stats.linregress(aero[mask], TM5o[mask])
 slope,intercept,rnew,p,stderr=stats.linregress(aero[mask], TM5n[mask])	
 rmse_old=RMSE(aero,TM5o)
 rmse_new=RMSE(aero,TM5n)
+print '%-6.6s\t%2d\t%6.4f\t%6.4f\t%6.4f\t%5.1f\t%5.1f\t%6.3f\t%6.3f\t%6.3f\t%6.3f\\\\ \n'%('all',len(TM5o),np.ma.mean(np.array(aero)),np.ma.mean(np.array(TM5n)),np.ma.mean(np.array(TM5o)),NMB_new,NMB_old,rnew,rold,rmse_new,rmse_old)
 aeronet_table.write('%-6.6s\t%2d\t%6.3f\t%6.3f\t%6.3f\t%5.1f\t%5.1f\t%6.3f\t%6.3f\t%6.3f\t%6.3f\\\\ \n'%('All',len(TM5o),np.ma.mean(np.array(aero)),np.ma.mean(np.array(TM5n)),np.ma.mean(np.array(TM5o)),NMB_new,NMB_old,rnew,rold,rmse_new,rmse_old))
 aeronet_table_latex.write('%-6.6s&%2d&%6.3f&%6.3f&%6.3f&%5.1f&%5.1f&%6.3f&%6.3f&%6.3f&%6.3f\\\\ \n'%('All',len(TM5o),np.ma.mean(np.array(aero) ),np.ma.mean(np.array(TM5n)),np.ma.mean(np.array(TM5o)),NMB_new,NMB_old,rnew,rold,rmse_new,rmse_old))
 
@@ -924,8 +992,8 @@ axit[0].annotate('a)',xy=(0.05,0.95),xycoords='axes fraction',fontsize=20)
 map_bias(aeronet_data_dict['all'],TM5NEWdatadict['all'],ax=axit[1],boundmax=1.1,name1='AERONET',name2='NEWSOA')
 axit[1].annotate('b)',xy=(0.05,0.95),xycoords='axes fraction',fontsize=20)
 plt.tight_layout()
-f_2panel_diff_old_diff_aeronet.savefig(output_png_path+'/article/fig15_map-2panel-aeronet-oldsoa.png',dpi=600)
-f_2panel_diff_old_diff_aeronet.savefig(output_pdf_path+'/article/fig15_map-2panel-aeronet-oldsoa.pdf')
+f_2panel_diff_old_diff_aeronet.savefig(output_png_path+'/article/fig15_revised_map-2panel-aeronet-oldsoa.png',dpi=600)
+f_2panel_diff_old_diff_aeronet.savefig(output_pdf_path+'/article/fig15_revised_map-2panel-aeronet-oldsoa.pdf')
 
 N_station=0
 for i in aeronet_data_dict['all']:

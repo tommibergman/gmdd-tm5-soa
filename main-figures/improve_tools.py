@@ -470,15 +470,15 @@ def read_model_data(exp,sitedata,logger,basepathprocessed='/Users/bergmant/Docum
 			filepath='/Volumes/Utrecht/'+exp+'/general_TM5_'+exp+'_2010.lev1.nc'			
 		####READ
 		print 'reading simulated radii'
-		RW=improve_tools.read_radius(filepath)
+		RW=read_radius(filepath)
 
 		radius_pm25=1.25
 
 		print 'read soa'
 		logger.info('Reading SOA for experiment %s from %s',exp, filepath )
-		soamassexp,soamodesexp=improve_tools.read_mass('M_SOA',filepath,radius_pm25) 
+		soamassexp,soamodesexp=read_mass('M_SOA',filepath,radius_pm25) 
 		print 'read oc'
-		pommassexp,pommodesexp=improve_tools.read_mass('M_POM',filepath,radius_pm25)
+		pommassexp,pommodesexp=read_mass('M_POM',filepath,radius_pm25)
 		print 'sum'	
 		poamass=soamassexp+pommassexp
 		print soamodesexp
@@ -499,10 +499,10 @@ def read_model_data(exp,sitedata,logger,basepathprocessed='/Users/bergmant/Docum
 		logger.debug('time axes, length %s, first value %s, type %s',len(dt_axis),dt_axis[0],type(dt_axis[0]))
 		#raw_input()
 		#Collocate total oa	
-		ncmodel,ncname,nctime,model_site=improve_tools.col_improve(poamass,timeaxis,sitedata)
+		ncmodel,ncname,nctime,model_site=col_improve(poamass,timeaxis,sitedata)
 		modetest={}
 		for i in soamodesexp:
-			test,nn,nt,ms=improve_tools.col_improve(soamodesexp[i],timeaxis,sitedata)
+			test,nn,nt,ms=col_improve(soamodesexp[i],timeaxis,sitedata)
 			print 'fsdfasdf',i,test,nn,nt 
 			print i,nn,nt
 			modetest[i]=test
@@ -513,7 +513,7 @@ def read_model_data(exp,sitedata,logger,basepathprocessed='/Users/bergmant/Docum
 				write_netcdf_file([data],[name],path_improve_col+exp+'_'+i+'_'+name+'.nc',None,None,np.array(time))#,lat,lon)
 							#### select!
 		for i in RW:
-			RW2,nn,nt,ms=improve_tools.col_improve(RW[i],timeaxis,sitedata)
+			RW2,nn,nt,ms=col_improve(RW[i],timeaxis,sitedata)
 			for data,name,time,sdata in zip(RW2,nn,nt,ms):
 				write_netcdf_file([data],[name],path_improve_col+exp+'_'+i+'_'+name+'.nc',None,None,np.array(time))#,lat,lon)
 		
@@ -521,11 +521,11 @@ def read_model_data(exp,sitedata,logger,basepathprocessed='/Users/bergmant/Docum
 			write_netcdf_file([data],[name],path_improve_col+exp+'_'+name+'.nc',None,None,np.array(time))#,lat,lon)
 		
 		#collocate primary oa
-		ncmodel_pom,ncname_pom,nctime,model_site=improve_tools.col_improve(pommassexp,timeaxis,sitedata)
+		ncmodel_pom,ncname_pom,nctime,model_site=col_improve(pommassexp,timeaxis,sitedata)
 		for data,name,time,sdata in zip(ncmodel_pom,ncname,nctime,model_site):
 			write_netcdf_file([data],[name],path_improve_col+exp+'_pom_'+name+'.nc',None,None,np.array(time))#,lat,lon)
 		#collocate secondary oa
-		ncmodel_soa,ncname_soa,nctime,model_site=improve_tools.col_improve(soamassexp,timeaxis,sitedata)
+		ncmodel_soa,ncname_soa,nctime,model_site=col_improve(soamassexp,timeaxis,sitedata)
 		for data,name,time,sdata in zip(ncmodel_soa,ncname,nctime,model_site):
 			write_netcdf_file([data],[name],path_improve_col+exp+'_soa_'+name+'.nc',None,None,np.array(time))#,lat,lon)
 			
