@@ -25,9 +25,13 @@ CN_analysis.py
 
 ## Fig10:
 improve_plots.py
+revision:
+improve_plots_revised.py
 
 ## Fig11:
 emep_read.py
+Revision:
+fig_emep.py  
 
 ## Fig12:
 load_oa.py
